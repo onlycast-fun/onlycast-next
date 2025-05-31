@@ -12,93 +12,68 @@ import {
 } from "@/components/ui/select";
 import { PostCard } from "@/components/posts/post-card";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
-
-// Mock data
-const mockPosts = [
-  {
-    id: "1",
-    creator: {
-      name: "Alice Chen",
-      avatar: "/placeholder.svg?height=40&width=40",
-      token: "ALICE",
-    },
-    content:
-      "Sharing some thoughts on blockchain technology today, especially its applications in decentralized social media. This image shows our latest architecture design.",
-    image: "/placeholder.svg?height=300&width=400",
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
-  },
-  {
-    id: "2",
-    creator: {
-      name: "Bob Wilson",
-      avatar: "/placeholder.svg?height=40&width=40",
-      token: "BOB",
-    },
-    content:
-      "Just completed a cool NFT project! This is an art collection our team spent 3 months creating.",
-    image: "/placeholder.svg?height=300&width=400",
-    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
-  },
-  {
-    id: "3",
-    creator: {
-      name: "Carol Davis",
-      avatar: "/placeholder.svg?height=40&width=40",
-      token: "CAROL",
-    },
-    content:
-      "The future of Web3 lies in users owning their own data and content. We're building a platform that truly belongs to creators.",
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-  },
-];
+import { useTrendingPosts } from "@/hooks/post/use-trending-posts";
 
 export default function PostsPage() {
   const [sortBy, setSortBy] = useState("latest");
-  const [posts, setPosts] = useState(mockPosts);
 
-  const handleLoadMore = () => {
-    // Simulate loading more
-    const morePosts = [...mockPosts].map((post) => ({
-      ...post,
-      id: post.id + "_" + Date.now(),
-      createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-    }));
-    setPosts((prev) => [...prev, ...morePosts]);
-  };
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isFetchingNextPage,
+    status,
+  } = useTrendingPosts(15); // 每页15条
+  const posts = data?.pages.flatMap((page) => page?.data) || [];
 
   return (
-    <div className="min-h-screen bg-background pt-14 md:pt-16 pb-20 md:pb-6">
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        {/* Top Control Area */}
-        <div className="flex items-center justify-between mb-6">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="latest">Latest</SelectItem>
-              <SelectItem value="hot">Hot</SelectItem>
-            </SelectContent>
-          </Select>
+    <div className="container mx-auto px-4 py-6 max-w-2xl">
+      {/* Top Control Area */}
+      <div className="flex items-center justify-between mb-6">
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="latest">Latest</SelectItem>
+            <SelectItem value="hot">Hot</SelectItem>
+          </SelectContent>
+        </Select>
 
-          <CreatePostDialog />
-        </div>
+        <CreatePostDialog />
+      </div>
 
-        {/* Posts List */}
-        <div className="space-y-4 mb-8">
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
-        </div>
+      {/* Posts List */}
+      <div className="space-y-4 mb-8">
+        {posts.map((post) => (
+          <PostCard key={post.cast.hash} token={post.token} cast={post.cast} />
+        ))}
+      </div>
 
-        {/* Load More Button */}
+      {/* Load More Button */}
+      {hasNextPage ? (
         <div className="flex justify-center">
-          <Button variant="outline" onClick={handleLoadMore} className="gap-2">
-            Load More
-            <ChevronDown className="w-4 h-4" />
+          <Button
+            variant="outline"
+            onClick={() => fetchNextPage()}
+            className="gap-2"
+          >
+            {isFetching || isFetchingNextPage ? (
+              <>
+                Loading...
+                <ChevronDown className="w-4 h-4 animate-bounce" />
+              </>
+            ) : (
+              <>
+                Load More
+                <ChevronDown className="w-4 h-4" />
+              </>
+            )}
           </Button>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

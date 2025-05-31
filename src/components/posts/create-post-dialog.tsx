@@ -31,60 +31,15 @@ import {
 } from "@/hooks/farcaster/use-farcaster-write";
 import { openFarcasterCreateCast } from "@/lib/farcaster";
 import { useCheckPostActions } from "@/hooks/check-actions/use-check-post-actions";
+import { usePrivy } from "@privy-io/react-auth";
+import { useUser } from "@/providers/user-provider";
+import { CreatePostAlert } from "./create-post-alert";
+import { EncryptedImageUpload } from "./encrypted-image-upload";
+import Link from "next/link";
+import { useUploadEncryptedText } from "@/hooks/use-upload-text";
 
 export function CreatePostDialog() {
   const [open, setOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<CreatePostData>({
-    resolver: zodResolver(createPostSchema),
-    defaultValues: {
-      content: "",
-    },
-  });
-  const { upload, uploading } = useUploadEncryptedImage();
-  const { submitCast, writing } = useFarcasterWrite();
-  const { checkCreatePost } = useCheckPostActions();
-
-  const onSubmit = async (data: CreatePostData) => {
-    if (!checkCreatePost()) return;
-
-    setIsSubmitting(true);
-
-    try {
-      let imageUrl: string | undefined;
-      if (data.image) {
-        const file = data.image;
-        imageUrl = await upload(file);
-      }
-      const text = data.content.trim();
-      const embedImages = [];
-      if (imageUrl) {
-        embedImages.push({
-          url: imageUrl,
-        });
-      }
-      const cast: SubmitCast = {
-        text: text || "",
-        embeds: [...embedImages],
-      };
-      openFarcasterCreateCast({
-        text: cast.text,
-        embeds: cast?.embeds?.map((embed) => embed.url || "") || [],
-      });
-      // const res = await submitCast(cast);
-      // if (!res?.hash) {
-      //   throw new Error("Failed to submit cast");
-      // }
-      toast.success("Post created successfully!");
-      setOpen(false);
-      form.reset();
-    } catch (error) {
-      toast.error("Creation failed, please try again");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -95,93 +50,176 @@ export function CreatePostDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>Create New Post</DialogTitle>
-        </DialogHeader>
-
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Share your thoughts..."
-                      className="min-h-[120px] resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="image"
-              render={({ field: { onChange, value, ...field } }) => (
-                <FormItem>
-                  <FormLabel>Image (Optional)</FormLabel>
-                  <FormControl>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Drag image here or click to upload
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) onChange(file);
-                        }}
-                        className="hidden"
-                        {...field}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const input = document.querySelector(
-                            'input[type="file"]'
-                          ) as HTMLInputElement;
-                          input?.click();
-                        }}
-                      >
-                        Choose File
-                      </Button>
-                      {value && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Selected: {value.name}
-                        </p>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Post"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <CreatePostContent setOpen={setOpen} />
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<CreatePostData>({
+    resolver: zodResolver(createPostSchema),
+    defaultValues: {
+      description: "",
+      encryptedContent: "",
+      encryptedImage: undefined,
+    },
+  });
+  const { upload: uploadText, uploading: uploadingText } =
+    useUploadEncryptedText();
+  const { upload: uploadImage, uploading: uploadingImage } =
+    useUploadEncryptedImage();
+  const { submitCast, writing } = useFarcasterWrite();
+  const { canCreatePost } = useCheckPostActions();
+
+  const onSubmit = async (data: CreatePostData) => {
+    if (!canCreatePost) return;
+
+    setIsSubmitting(true);
+
+    try {
+      let textUrl: string | undefined;
+      if (data.encryptedContent) {
+        const text = data.encryptedContent;
+        textUrl = await uploadText(text);
+      }
+      let imageUrl: string | undefined;
+      if (data.encryptedImage) {
+        const file = data.encryptedImage;
+        imageUrl = await uploadImage(file);
+      }
+
+      // publish to Farcaster
+      const text = data.description.trim();
+      const embeds = [];
+      if (textUrl) {
+        embeds.push({
+          url: textUrl,
+        });
+      }
+      if (imageUrl) {
+        embeds.push({
+          url: imageUrl,
+        });
+      }
+      const cast: SubmitCast = {
+        text: text || "",
+        embeds: [...embeds],
+      };
+      openFarcasterCreateCast({
+        text: cast.text,
+        embeds: cast?.embeds?.map((embed) => embed.url || "") || [],
+      });
+      return;
+      const res = await submitCast(cast);
+      if (res?.hash) {
+        toast.success(
+          <div>
+            Post created successfully!{" "}
+            <Link
+              href={`/posts/${res.hash}`}
+              className="text-primary hover:underline"
+            >
+              View Post
+            </Link>
+          </div>,
+          {
+            position: "top-center",
+          }
+        );
+        setOpen(false);
+        form.reset();
+      } else {
+        toast.error("Post creation failed, please try again");
+      }
+    } catch (error) {
+      toast.error("Creation failed, please try again");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  return (
+    <>
+      {" "}
+      <DialogHeader>
+        <DialogTitle>Create New Post</DialogTitle>
+      </DialogHeader>
+      <CreatePostAlert />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Say something to remind us not to miss it..."
+                    className="min-h-[120px] resize-none"
+                    disabled={!canCreatePost || isSubmitting}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="encryptedContent"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Encrypted Content (Optional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder={`Record your exclusive news... \r\nOnly users who hold your token can view this content`}
+                    className="min-h-[200px] resize-none border-primary"
+                    disabled={!canCreatePost || isSubmitting}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="encryptedImage"
+            render={({ field: { onChange, value, ...field } }) => (
+              <FormItem>
+                <FormLabel>Encrypted Image (Optional)</FormLabel>
+                <FormControl>
+                  <EncryptedImageUpload
+                    value={value}
+                    onChange={onChange}
+                    disabled={!canCreatePost || isSubmitting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!canCreatePost || isSubmitting}>
+              {isSubmitting ? "Creating..." : "Create Post"}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }

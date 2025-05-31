@@ -1,11 +1,15 @@
 import { z } from "zod";
 
 export const createPostSchema = z.object({
-  content: z
+  description: z
     .string()
-    .min(1, "Content cannot be empty")
-    .max(500, "Content cannot exceed 500 characters"),
-  image: z.instanceof(File).optional(),
+    .min(1, "Description cannot be empty")
+    .max(500, "Description cannot exceed 200 characters"),
+  encryptedContent: z
+    .string()
+    .max(10000, "Content cannot exceed 10000 characters")
+    .optional(),
+  encryptedImage: z.instanceof(File).optional(),
 });
 
 export const createTokenSchema = z.object({

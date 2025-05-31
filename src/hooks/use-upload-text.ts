@@ -1,12 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
 import { usePrivy } from "@privy-io/react-auth";
 import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
-import { API_URL } from "@/constants";
 import { useCallback, useState } from "react";
-import { getEncryptedImagePageLink } from "@/lib/encrypted-record";
+import { getEncryptedTextPageLink } from "@/lib/encrypted-record";
 
-export function useUploadEncryptedImage() {
+export function useUploadEncryptedText() {
   const { sdk } = useRequestSDK();
   const { user } = usePrivy();
   const userId = user?.id;
@@ -14,20 +12,16 @@ export function useUploadEncryptedImage() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (file: File): Promise<string> => {
-      if (!file) throw new Error("No file provided");
+    async (text: string): Promise<string> => {
+      if (!text) throw new Error("No text provided");
       try {
         setUploading(true);
 
         // 1. 执行增强加密
-        const { encrypted, salt, iv } = await FrontendCrypto.encryptFile(
-          file,
+        const { encrypted, salt, iv } = await FrontendCrypto.encryptText(
+          text,
           userId
         );
-
-        // 2. 构造FormData
-        const formData = new FormData();
-        formData.append("file", new Blob([encrypted]), file.name);
 
         // 3. 上传到Arweave
         const uploadRes = await sdk.request<{
@@ -35,14 +29,15 @@ export function useUploadEncryptedImage() {
           itemId: string;
           arUrl: string;
           arseedUrl: string;
-        }>(`/ar-upload/image`, {
+        }>(`/ar-upload/text`, {
           method: "POST",
-          body: formData,
-          isFormData: true,
+          body: JSON.stringify({
+            text: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
+          }),
         });
         const { data } = uploadRes;
         if (!data) {
-          throw new Error("Failed to upload image");
+          throw new Error("Failed to upload text");
         }
 
         // 4. 记录上传日志
@@ -52,7 +47,7 @@ export function useUploadEncryptedImage() {
             ar_id: data.itemId,
             salt: btoa(String.fromCharCode(...salt)),
             iv: btoa(String.fromCharCode(...iv)),
-            type: "image",
+            type: "text",
           }),
         });
         const { data: logData } = logRes;
@@ -60,9 +55,9 @@ export function useUploadEncryptedImage() {
           throw new Error("Failed to log upload");
         }
         const arId = uploadRes.data.itemId;
-        return getEncryptedImagePageLink(arId);
+        return getEncryptedTextPageLink(arId);
       } catch (error) {
-        console.error("Image upload failed:", error);
+        console.error("Text upload failed:", error);
         throw error;
       } finally {
         setUploading(false);

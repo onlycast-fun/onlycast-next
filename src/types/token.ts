@@ -11,7 +11,8 @@ export type Token = {
   name: string;
   symbol: string;
   image: string;
-  contractAddress: string;
-  creatorAddress: string;
-  createdAt?: Date;
+  token_address: string;
+  creator_address: string;
+  market_cap: number;
+  created_at?: Date;
 };

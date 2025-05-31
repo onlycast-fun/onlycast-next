@@ -18,7 +18,7 @@ import { usePrivy } from "@privy-io/react-auth";
 export function UserProfile() {
   const { user } = useUser();
   const tokens = user?.tokens || [];
-  const { authenticated, logout, user: privyUser, login } = usePrivy();
+  const { ready, authenticated, logout, user: privyUser, login } = usePrivy();
   const { wallet } = privyUser || {};
   const walletAddress = wallet?.address || "";
 
@@ -28,6 +28,14 @@ export function UserProfile() {
       toast.success("Wallet address copied!");
     }
   };
+
+  if (!ready) {
+    return (
+      <Button disabled variant="default" size="sm">
+        Loading...
+      </Button>
+    );
+  }
 
   if (!authenticated) {
     return (
@@ -77,7 +85,7 @@ export function UserProfile() {
           <div className="px-2 py-1 space-y-2 max-h-40 overflow-y-auto">
             {tokens.map((token) => (
               <div
-                key={token.contractAddress}
+                key={token.token_address}
                 className="flex items-center justify-between p-2 rounded-md bg-muted/50"
               >
                 <div className="flex items-center gap-2">
@@ -85,9 +93,9 @@ export function UserProfile() {
                     ${token.symbol}
                   </Badge>
                 </div>
-                {/* <span className="text-xs font-medium text-primary">
-                  {formatMarketCap(token.mcap)}
-                </span> */}
+                <span className="text-xs font-medium text-primary">
+                  {formatMarketCap(token.market_cap || 0)}
+                </span>
               </div>
             ))}
           </div>

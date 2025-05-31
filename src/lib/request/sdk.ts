@@ -11,14 +11,14 @@ import {
 
 export class RequestSdk {
   private apiUrl: string;
-  private token: string | null = null;
+  private authToken: string | null = null;
 
   constructor(apiUrl: string) {
     this.apiUrl = apiUrl;
   }
 
-  public setToken(token: string) {
-    this.token = token;
+  public setAuthToken(token: string) {
+    this.authToken = token;
   }
 
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -65,8 +65,8 @@ export class RequestSdk {
       ...headers,
     };
 
-    if (this.token) {
-      finalHeaders.Authorization = `Bearer ${this.token}`;
+    if (this.authToken) {
+      finalHeaders.Authorization = `Bearer ${this.authToken}`;
     }
 
     let attempt = 1;
@@ -87,8 +87,15 @@ export class RequestSdk {
     }
   }
 
-  async getTrendingFeed(fid: number) {
-    return await this.request<{ data: Array<Post> }>(`/feeds/${fid}/trending`);
+  async getTrendingFeed(pageParam: { cursor?: string; limit?: number }) {
+    const params = new URLSearchParams();
+    if (pageParam.cursor) params.append("cursor", pageParam.cursor);
+    if (pageParam.limit !== undefined)
+      params.append("limit", String(pageParam.limit));
+    const queryString = params.toString() ? `?${params.toString()}` : "";
+    return await this.request<{ data: { data: Array<Post>; next: string } }>(
+      `/feeds${queryString}`
+    );
   }
 
   async getNewFeed(fid: number, page = 1) {
@@ -133,6 +140,16 @@ export class RequestSdk {
     return await this.request<{ data: Token[] }>("/users/tokens");
   }
 
+  async getTokens(pageParam: { page?: number; limit?: number }) {
+    const params = new URLSearchParams();
+    if (pageParam.page) params.append("page", String(pageParam.page));
+    if (pageParam.limit !== undefined)
+      params.append("limit", String(pageParam.limit));
+    return await this.request<{ data: Token[] }>(
+      "/tokens?" + params.toString()
+    );
+  }
+
   async getToken(id: string) {
     return await this.request<Token>(`/tokens/${id}`);
   }
@@ -146,7 +163,7 @@ export class RequestSdk {
       socialMediaUrls?: string[];
       auditUrls?: string[];
     };
-    vault?: { percentage: number; durationInDays: number };
+    vault?: { percentage?: number; durationInDays?: number };
   }) {
     return await this.request<Token>(`/tokens`, {
       method: "POST",
@@ -155,8 +172,8 @@ export class RequestSdk {
   }
 
   async getNotifications() {
-    if (!this.token) {
-      return { error: { message: "No token", status: 401 } };
+    if (!this.authToken) {
+      return { error: { message: "No auth token", status: 401 } };
     }
     return await this.request<{ data: Array<Post> }>(`/auth/notifications`);
   }

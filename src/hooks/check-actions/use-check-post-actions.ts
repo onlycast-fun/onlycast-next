@@ -1,20 +1,14 @@
+import { useUser } from "@/providers/user-provider";
 import { usePrivy } from "@privy-io/react-auth";
 
 export function useCheckPostActions() {
-  const { authenticated, login, linkWallet, user } = usePrivy();
-  const wallet = user?.wallet;
+  const { authenticated, login, linkWallet, user: privyUser } = usePrivy();
+  const wallet = privyUser?.wallet;
 
-  const checkCreatePost = () => {
-    if (!authenticated) {
-      login();
-      return false;
-    }
-    if (!wallet) {
-      linkWallet();
-      return false;
-    }
-    return true;
-  };
+  const { user } = useUser();
+  const hasTokens = (user?.tokens?.length ?? 0) > 0;
 
-  return { checkCreatePost };
+  const canCreatePost = authenticated && wallet && hasTokens;
+
+  return { canCreatePost };
 }

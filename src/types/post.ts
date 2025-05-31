@@ -1,19 +1,11 @@
-import { FarcasterCast, FarcasterUser } from "./farcaster";
+import { FarcasterUser } from "./farcaster";
 import { TwitterUser } from "./twitter";
 import { Token } from "./token";
+import { NeynarCast } from "./neynar";
 
-export type Post = FarcasterCast & {
-  reveal?: Reveal;
-  relationships: Array<Relationship>;
+export type Post = {
   token?: Token;
-  aggregate: {
-    likes: number;
-    replies: number;
-  };
-  user?: {
-    liked: boolean;
-  };
-  parentText?: string;
+  cast: NeynarCast;
 };
 
 export type Reveal = {

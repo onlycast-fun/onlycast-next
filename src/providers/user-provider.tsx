@@ -12,7 +12,7 @@ import { useRequestSDK } from "./request-sdk-provider";
 import { Token } from "@/types";
 
 interface User {
-  tokens: Array<Token & {}>;
+  tokens: Array<Token>;
 }
 
 interface UserContextType {
@@ -23,10 +23,9 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const { authenticated } = usePrivy();
-  const { sdk } = useRequestSDK();
+  const { sdk, sdkAuthed } = useRequestSDK();
   useEffect(() => {
-    if (authenticated) {
+    if (sdkAuthed) {
       const fetchUserTokens = async () => {
         try {
           const res = await sdk.getUserTokens();
@@ -42,7 +41,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } else {
       setUser(null);
     }
-  }, [authenticated, sdk]);
+  }, [sdkAuthed, sdk]);
 
   return (
     <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>

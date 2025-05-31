@@ -8,9 +8,11 @@ import {
   ReactNode,
   useMemo,
   useEffect,
+  useState,
 } from "react";
 interface RequestSDKContextValue {
   sdk: RequestSdk;
+  sdkAuthed?: boolean;
 }
 
 export const RequestSDKContext = createContext<
@@ -19,20 +21,24 @@ export const RequestSDKContext = createContext<
 
 export const RequestSDKProvider = ({ children }: { children: ReactNode }) => {
   const sdk = useMemo(() => new RequestSdk(API_URL), []);
-  const { authenticated, getAccessToken } = usePrivy();
+  const [sdkAuthed, setSdkAuthed] = useState(false);
+  const { ready, authenticated, getAccessToken } = usePrivy();
   useEffect(() => {
     (async () => {
+      if (!ready) return;
       if (authenticated) {
         const accessToken = await getAccessToken();
-        sdk.setToken(accessToken!);
+        sdk.setAuthToken(accessToken!);
+        setSdkAuthed(true);
       } else {
-        sdk.setToken("");
+        sdk.setAuthToken("");
+        setSdkAuthed(false);
       }
     })();
-  }, [authenticated, getAccessToken, sdk]);
+  }, [ready, authenticated, getAccessToken, sdk]);
 
   return (
-    <RequestSDKContext.Provider value={{ sdk }}>
+    <RequestSDKContext.Provider value={{ sdk, sdkAuthed }}>
       {children}
     </RequestSDKContext.Provider>
   );

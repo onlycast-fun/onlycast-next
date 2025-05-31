@@ -9,8 +9,9 @@ export function formatMarketCap(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
     notation: "compact",
-    compactDisplay: "short",
   }).format(value);
 }
 

@@ -1,15 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatMarketCap } from "@/lib/utils";
-
-interface Token {
-  id: string;
-  name: string;
-  symbol: string;
-  image: string;
-  createdAt: Date;
-  marketCap: number;
-}
+import { Token } from "@/types";
+import dayjs from "dayjs";
+import { Button } from "../ui/button";
+import Link from "next/link";
+import { getClankerTokenPath } from "@/lib/clanker/path";
 
 interface TokenCardProps {
   token: Token;
@@ -44,16 +40,24 @@ export function TokenCard({ token }: TokenCardProps) {
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">MCAP</span>
               <span className="font-semibold text-primary">
-                {formatMarketCap(token.marketCap)}
+                {formatMarketCap(token?.market_cap || 0)}
               </span>
             </div>
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Created</span>
               <span className="text-muted-foreground">
-                {token.createdAt.toLocaleDateString("en-US")}
+                {dayjs(token.created_at).format("MMM D, YYYY")}
               </span>
             </div>
           </div>
+
+          <Link
+            href={getClankerTokenPath(token.token_address)}
+            target="_blank"
+            className="p-0 text-primary hover:underline font-medium"
+          >
+            View Details
+          </Link>
         </div>
       </CardContent>
     </Card>

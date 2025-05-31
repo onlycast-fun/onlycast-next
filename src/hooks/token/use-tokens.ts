@@ -1,27 +1,26 @@
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export function useTrendingPosts(limit: number) {
+export function useTokens(limit: number) {
   const { sdk } = useRequestSDK();
 
   return useInfiniteQuery({
-    queryKey: ["trending-posts", limit], // 包含limit的查询键
+    queryKey: ["tokens", limit], // 包含limit的查询键
     queryFn: async ({ pageParam }) => {
-      const res = await sdk.getTrendingFeed({
-        cursor: pageParam,
+      const res = await sdk.getTokens({
+        page: pageParam,
         limit: limit,
       });
-      console.log("trending posts", res.data);
-      const resData = res?.data?.data;
+      const data = res.data?.data || [];
+      const nextPage = data.length === limit ? (pageParam || 1) + 1 : undefined;
       return {
-        data: resData?.data || [],
-        next: resData?.next || "", // 返回下一页游标
+        data,
+        nextPage,
       };
     },
-    initialPageParam: "", // 初始没有游标
+    initialPageParam: 1, // 初始页码
     getNextPageParam: (lastPage) => {
-      // 如果有下一页游标则返回，否则返回undefined表示结束
-      return lastPage?.next || "";
+      return lastPage.nextPage || undefined;
     },
     getPreviousPageParam: (firstPage) => {
       // 如果需要向前分页（这里不需要）
