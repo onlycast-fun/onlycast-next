@@ -113,27 +113,27 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
         embeds: cast?.embeds?.map((embed) => embed.url || "") || [],
       });
       return;
-      const res = await submitCast(cast);
-      if (res?.hash) {
-        toast.success(
-          <div>
-            Post created successfully!{" "}
-            <Link
-              href={`/posts/${res.hash}`}
-              className="text-primary hover:underline"
-            >
-              View Post
-            </Link>
-          </div>,
-          {
-            position: "top-center",
-          }
-        );
-        setOpen(false);
-        form.reset();
-      } else {
-        toast.error("Post creation failed, please try again");
-      }
+      // const res = await submitCast(cast);
+      // if (res?.hash) {
+      //   toast.success(
+      //     <div>
+      //       Post created successfully!{" "}
+      //       <Link
+      //         href={`/posts/${res.hash}`}
+      //         className="text-primary hover:underline"
+      //       >
+      //         View Post
+      //       </Link>
+      //     </div>,
+      //     {
+      //       position: "top-center",
+      //     }
+      //   );
+      //   setOpen(false);
+      //   form.reset();
+      // } else {
+      //   toast.error("Post creation failed, please try again");
+      // }
     } catch (error) {
       toast.error("Creation failed, please try again");
     } finally {
