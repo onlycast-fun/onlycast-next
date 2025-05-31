@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
+import { getDecryptionImageApiWithPageLink } from "@/lib/encrypted-record";
 
 interface EncryptedImageProps {
   visitLink: string;
@@ -23,7 +24,7 @@ export function EncryptedImage({
   const [isLoading, setIsLoading] = useState(false);
   const { authenticated, login, user, linkWallet } = usePrivy();
   const walletAddress = user?.wallet?.address || "";
-
+  const api = getDecryptionImageApiWithPageLink(visitLink);
   const handleUnlock = async () => {
     if (!authenticated) {
       toast.error("You must be logged in to unlock this image");
@@ -40,7 +41,7 @@ export function EncryptedImage({
 
     try {
       const token = await getAccessToken();
-      const response = await fetch(imgUrl, {
+      const response = await fetch(api, {
         headers: {
           Accept: "application/json",
           Authorization: `Bearer ${token}`,
