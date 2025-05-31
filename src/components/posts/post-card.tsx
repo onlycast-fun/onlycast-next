@@ -11,6 +11,8 @@ import NeynarCastText from "./casts/cast-text";
 import Link from "next/link";
 import { getFarcasterUserPath } from "@/lib/farcaster/path";
 import { EncryptedText } from "./encrypted-text";
+import { getClankerTokenPath } from "@/lib/clanker/path";
+import { formatMarketCap } from "@/lib/utils";
 
 interface PostCardProps {
   token?: Token;
@@ -25,26 +27,45 @@ export function PostCard({ token, cast }: PostCardProps) {
     <Card className="w-full transition-all hover:shadow-md">
       <CardContent className="flex flex-col gap-4">
         {/* Creator Info */}
-        <div className="flex items-center space-x-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage
-              src={author.pfp_url || "/placeholder.svg"}
-              alt={author.display_name || author.username}
-            />
-            <AvatarFallback>{author.display_name[0]}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <Link
-              className="font-medium text-sm hover:underline"
-              href={getFarcasterUserPath(author.username)}
-              target="_blank"
-            >
-              {author.display_name || author.username}
-            </Link>
-            <p className="text-xs text-muted-foreground">
-              {dayjs(cast.timestamp).fromNow()}
-            </p>
+        <div className="flex items-start justify-between">
+          {" "}
+          <div className="flex items-center space-x-3">
+            <Avatar className="w-10 h-10">
+              <AvatarImage
+                src={author.pfp_url || "/placeholder.svg"}
+                alt={author.display_name || author.username}
+              />
+              <AvatarFallback>{author.display_name[0]}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <Link
+                className="font-medium text-sm hover:underline"
+                href={getFarcasterUserPath(author.username)}
+                target="_blank"
+              >
+                {author.display_name || author.username}
+              </Link>
+              <p className="text-xs text-muted-foreground">
+                {dayjs(cast.timestamp).fromNow()}
+              </p>
+            </div>
           </div>
+          {!!token && (
+            <div className="flex flex-col items-end gap-1">
+              <Link
+                href={getClankerTokenPath(token.token_address)}
+                target="_blank"
+                className="p-0 font-medium text-sm text-primary hover:underline"
+              >
+                ${token.symbol}
+              </Link>
+              {!!token.market_cap && (
+                <p className="text-xs text-muted-foreground">
+                  {formatMarketCap(token.market_cap)}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Post Content */}
