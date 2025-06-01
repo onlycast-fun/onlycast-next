@@ -8,7 +8,7 @@ const fontPath = join(process.cwd(), "Roboto-Regular.ttf");
 const fontData = fs.readFileSync(fontPath);
 export async function GET(
   req: NextRequest,
-  { params }: { params: { arid: string } }
+  { params }: { params: Promise<{ arid: string }> }
 ) {
   const svg = await satori(
     <div tw="absolute inset-0 bg-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-neutral-500">
