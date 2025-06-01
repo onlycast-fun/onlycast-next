@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatMarketCap, shortPubKey } from "@/lib/utils";
 import { useUser } from "@/providers/user-provider";
 import { usePrivy } from "@privy-io/react-auth";
+import Link from "next/link";
+import { getClankerTokenPath } from "@/lib/clanker/path";
 
 export function UserProfile() {
   const { user } = useUser();
@@ -89,9 +91,17 @@ export function UserProfile() {
                 className="flex items-center justify-between p-2 rounded-md bg-muted/50"
               >
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="font-mono text-xs">
-                    ${token.symbol}
-                  </Badge>
+                  <Link
+                    href={getClankerTokenPath(token.token_address)}
+                    target="_blank"
+                  >
+                    <Badge
+                      variant="secondary"
+                      className="font-mono text-xs hover:underline"
+                    >
+                      ${token.symbol}
+                    </Badge>
+                  </Link>
                 </div>
                 <span className="text-xs font-medium text-primary">
                   {formatMarketCap(token.market_cap || 0)}

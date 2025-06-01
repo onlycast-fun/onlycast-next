@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "frames": "frames"
   },
   "dependencies": {
     "@farcaster/frame-sdk": "^0.0.53",
@@ -39,6 +40,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.55.0",
+    "satori": "^0.13.1",
+    "sharp": "^0.34.2",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
     "tw-animate-css": "^1.2.5",
