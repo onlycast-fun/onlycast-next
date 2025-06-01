@@ -7,9 +7,10 @@ import type { Metadata } from "next";
 export async function generateMetadata({
   params,
 }: {
-  params: { arid: string };
+  params: Promise<{ arid: string }>;
 }): Promise<Metadata> {
-  const imageUrl = `${ONLYCAST_HOST}/encrypteds/image/${params.arid}/og-image`;
+  const { arid } = await params;
+  const imageUrl = `${ONLYCAST_HOST}/encrypteds/image/${arid}/og-image`;
   const title = "Encrypted Image";
   const description = "Go to onlycast.fun to unlock";
 
