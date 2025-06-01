@@ -12,7 +12,7 @@ export async function GET(
 ) {
   const svg = await satori(
     <div tw="absolute inset-0 bg-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-neutral-500">
-      <p tw="text-white text-base font-semibold mb-1">Click to view image</p>
+      <p tw="text-white text-[60px] font-semibold mb-1">Click to view image</p>
     </div>,
     {
       width: 1200,
