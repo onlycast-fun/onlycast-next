@@ -91,7 +91,7 @@ export function PostCard({ token, cast }: PostCardProps) {
               key={idx}
               visitLink={img.url}
               creatorToken={token}
-              className="w-full h-48 md:h-64 mb-4"
+              className="w-full min-h-48 md:h-64 mb-4"
             />
           ))}
       </CardContent>
