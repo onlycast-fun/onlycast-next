@@ -60,7 +60,7 @@ export function EncryptedImage({
   return (
     <div className={cn("relative overflow-hidden rounded-lg", className)}>
       <img
-        src={imgUrl || "/placeholder.svg"}
+        src={imgUrl}
         className={cn(
           "w-full h-full object-cover transition-all duration-300",
           !isUnlocked && "blur-[10px]"

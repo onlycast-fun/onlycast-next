@@ -47,7 +47,10 @@ export default async function EncryptedImagePage({
   const { arid } = await params;
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <EncryptedImage visitLink={getEncryptedImagePageLink(arid)} />
+      <EncryptedImage
+        className="w-full min-h-48 md:h-64 mb-4"
+        visitLink={getEncryptedImagePageLink(arid)}
+      />
     </div>
   );
 }
