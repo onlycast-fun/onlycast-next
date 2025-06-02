@@ -23,7 +23,7 @@ export function Navbar() {
           {/* Left side - Logo and Navigation */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold text-primary">
-              Onlycast
+              OnlyCast
             </Link>
 
             <div className="flex items-center space-x-6">
