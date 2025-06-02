@@ -6,6 +6,7 @@ import { useUser } from "@/providers/user-provider";
 import { Token } from "@/types";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
+import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 
 export function CheckLinkedWalletAlert({
   linkWallet,
@@ -60,15 +61,15 @@ export function CheckUserTokensAlert({ token }: { token: Token }) {
 
 export function CreateTokenAlert() {
   const { user } = useUser();
-  const { authenticated, login, user: privyUser, linkWallet } = usePrivy();
-  const walletAddress = privyUser?.wallet?.address;
+  const { authenticated, login } = usePrivy();
+  const { linkedExternalWallet, linkWallet } = useUserWallet();
   const token = user?.tokens?.[0];
 
   if (!authenticated) {
     return <CheckUserLoginAlert login={login} />;
   }
 
-  if (!walletAddress) {
+  if (!linkedExternalWallet?.address) {
     return <CheckLinkedWalletAlert linkWallet={linkWallet} />;
   }
 

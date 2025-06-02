@@ -31,6 +31,7 @@ import { CreateTokenAlert } from "./create-token-alert";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { useUser } from "@/providers/user-provider";
+import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 
 export function CreateTokenDialog() {
   const [open, setOpen] = useState(false);
@@ -83,9 +84,9 @@ export function CreateTokenContent({
     },
   });
 
-  const { authenticated, login, user: privyUser, linkWallet } = usePrivy();
-  const wallet = privyUser?.wallet;
-  const { user } = useUser();
+  const { authenticated, login } = usePrivy();
+  const { linkedExternalWallet, linkWallet } = useUserWallet();
+  const { user, setUser } = useUser();
   const hasTokens = (user?.tokens?.length ?? 0) > 0;
 
   const { create, creating } = useCreateToken();
@@ -95,7 +96,7 @@ export function CreateTokenContent({
       login();
       return;
     }
-    if (!wallet) {
+    if (!linkedExternalWallet) {
       linkWallet();
       return;
     }
@@ -105,6 +106,17 @@ export function CreateTokenContent({
     try {
       setIsSubmitting(true);
       const token = await create(data);
+      setUser((prev) => {
+        if (!prev) {
+          return {
+            tokens: [token],
+          };
+        }
+        return {
+          ...prev,
+          tokens: [token],
+        };
+      });
       if (token.token_address) {
         toast.success(
           <div>
@@ -135,7 +147,11 @@ export function CreateTokenContent({
   };
 
   const disabled =
-    !authenticated || !wallet?.address || hasTokens || creating || isSubmitting;
+    !authenticated ||
+    !linkedExternalWallet?.address ||
+    hasTokens ||
+    creating ||
+    isSubmitting;
 
   return (
     <>

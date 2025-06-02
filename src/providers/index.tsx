@@ -28,22 +28,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <PrivyProvider
-        appId={PRIVY_APP_ID}
-        //   clientId="your-app-client-id"
-        config={{
-          loginMethods: ["farcaster"],
-          embeddedWallets: {
-            createOnLogin: "all-users",
-          },
-        }}
-      >
-        <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <PrivyProvider
+          appId={PRIVY_APP_ID}
+          //   clientId="your-app-client-id"
+          config={{
+            loginMethods: ["farcaster", "wallet"],
+            embeddedWallets: {
+              createOnLogin: "all-users",
+            },
+            appearance: { walletChainType: "ethereum-only" },
+          }}
+        >
           <RequestSDKProvider>
             <UserProvider>{children}</UserProvider>
           </RequestSDKProvider>
-        </QueryClientProvider>
-      </PrivyProvider>
+        </PrivyProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }

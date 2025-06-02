@@ -3,6 +3,8 @@
 import { usePrivy } from "@privy-io/react-auth";
 import {
   createContext,
+  Dispatch,
+  SetStateAction,
   useContext,
   useEffect,
   useState,
@@ -17,6 +19,7 @@ interface User {
 
 interface UserContextType {
   user: User | null;
+  setUser: Dispatch<SetStateAction<User | null>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -44,7 +47,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [sdkAuthed, sdk]);
 
   return (
-    <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ user, setUser }}>
+      {children}
+    </UserContext.Provider>
   );
 }
 

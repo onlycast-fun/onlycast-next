@@ -5,6 +5,7 @@ import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { CreateTokenDialogWithLink } from "../tokens/create-token-dialog";
+import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 
 export function CheckUserTokensAlert() {
   return (
@@ -52,15 +53,15 @@ export function CheckUserLoginAlert({ login }: { login: () => void }) {
 
 export function CreatePostAlert() {
   const { user } = useUser();
-  const { authenticated, login, user: privyUser, linkWallet } = usePrivy();
-  const walletAddress = privyUser?.wallet?.address;
+  const { authenticated, login } = usePrivy();
+  const { linkedExternalWallet, linkWallet } = useUserWallet();
   const hasTokens = (user?.tokens?.length ?? 0) > 0;
 
   if (!authenticated) {
     return <CheckUserLoginAlert login={login} />;
   }
 
-  if (!walletAddress) {
+  if (!linkedExternalWallet?.address) {
     return <CheckLinkedWalletAlert linkWallet={linkWallet} />;
   }
 

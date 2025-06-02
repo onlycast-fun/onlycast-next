@@ -1,5 +1,5 @@
 "use client";
-import { ChevronDown, Copy, LogOut, Wallet } from "lucide-react";
+import { ChevronDown, Copy, LogOut, Unlink, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,20 +13,22 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatMarketCap, shortPubKey } from "@/lib/utils";
 import { useUser } from "@/providers/user-provider";
-import { usePrivy } from "@privy-io/react-auth";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
+import { useFarcasterAccount } from "@/hooks/farcaster/use-farcaster-account";
+import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 
 export function UserProfile() {
   const { user } = useUser();
   const tokens = user?.tokens || [];
   const { ready, authenticated, logout, user: privyUser, login } = usePrivy();
-  const { wallet } = privyUser || {};
-  const walletAddress = wallet?.address || "";
 
+  const { linkedWallet, linkWallet, unlinkWallet } = useUserWallet();
+  const linkedWalletAddress = linkedWallet?.address || "";
   const copyAddress = () => {
-    if (walletAddress) {
-      navigator.clipboard.writeText(walletAddress);
+    if (linkedWalletAddress) {
+      navigator.clipboard.writeText(linkedWalletAddress);
       toast.success("Wallet address copied!");
     }
   };
@@ -52,28 +54,61 @@ export function UserProfile() {
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-2">
           <Wallet className="w-4 h-4" />
-          <span className="hidden sm:inline">{shortPubKey(walletAddress)}</span>
-          <span className="sm:hidden">{shortPubKey(walletAddress)}</span>
+          <span className="hidden sm:inline">
+            {shortPubKey(privyUser?.id || "")}
+          </span>
+          <span className="sm:hidden">{shortPubKey(privyUser?.id || "")}</span>
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
         <DropdownMenuLabel className="font-normal">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-1">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">Linked Wallet</p>
-              <p className="text-xs leading-none text-muted-foreground">
-                {shortPubKey(walletAddress)}
-              </p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={copyAddress}
-              className="h-8 w-8 p-0 hover:bg-muted"
-            >
-              <Copy className="w-4 h-4" />
-            </Button>
+            {linkedWalletAddress ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-xs leading-none text-muted-foreground">
+                    {shortPubKey(linkedWalletAddress)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyAddress}
+                    className="h-8 w-8 p-0 hover:bg-muted"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    unlinkWallet(linkedWalletAddress);
+                    toast.success("Wallet unlinked successfully!");
+                  }}
+                  className="h-8 w-8 p-0 hover:bg-muted"
+                >
+                  <Unlink className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-xs leading-none text-muted-foreground">
+                  No wallet linked
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => linkWallet()}
+                  className="h-8 w-8 p-0 hover:bg-muted"
+                >
+                  <Wallet className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
