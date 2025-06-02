@@ -37,6 +37,8 @@ import { CreatePostAlert } from "./create-post-alert";
 import { EncryptedImageUpload } from "./encrypted-image-upload";
 import Link from "next/link";
 import { useUploadEncryptedText } from "@/hooks/use-upload-text";
+import { useUploadMultipleContent } from "@/hooks/use-upload-multiple-content";
+import { UnencryptedJsonType } from "@/types/encrypted-record";
 
 export function CreatePostDialog() {
   const [open, setOpen] = useState(false);
@@ -71,6 +73,8 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
     useUploadEncryptedText();
   const { upload: uploadImage, uploading: uploadingImage } =
     useUploadEncryptedImage();
+  const { upload: uploadMultiContent, uploading: uploadingMultiContent } =
+    useUploadMultipleContent();
   const { submitCast, writing } = useFarcasterWrite();
   const { canCreatePost } = useCheckPostActions();
 
@@ -80,30 +84,49 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
     setIsSubmitting(true);
 
     try {
-      let textUrl: string | undefined;
+      let textPageLink: string | undefined;
+      let textArId: string | undefined;
       if (data.encryptedContent) {
         const text = data.encryptedContent;
-        textUrl = await uploadText(text);
+        const { arId, pageLink } = await uploadText(text);
+        textPageLink = pageLink;
+        textArId = arId;
       }
-      let imageUrl: string | undefined;
+      let imagePageLink: string | undefined;
+      let imageArId: string | undefined;
       if (data.encryptedImage) {
         const file = data.encryptedImage;
-        imageUrl = await uploadImage(file);
+        const { arId, pageLink } = await uploadImage(file);
+        imagePageLink = pageLink;
+        imageArId = arId;
       }
 
       // publish to Farcaster
       const text = data.description.trim();
       const embeds = [];
-      if (textUrl) {
-        embeds.push({
-          url: textUrl,
+
+      if (!!textArId && !!imageArId) {
+        const { pageLink } = await uploadMultiContent({
+          type: UnencryptedJsonType.emc,
+          text_ar_id: textArId,
+          image_ar_id: imageArId,
         });
-      }
-      if (imageUrl) {
         embeds.push({
-          url: imageUrl,
+          url: pageLink,
         });
+      } else {
+        if (textPageLink) {
+          embeds.push({
+            url: textPageLink,
+          });
+        }
+        if (imagePageLink) {
+          embeds.push({
+            url: imagePageLink,
+          });
+        }
       }
+
       const cast: SubmitCast = {
         text: text || "",
         embeds: [...embeds],

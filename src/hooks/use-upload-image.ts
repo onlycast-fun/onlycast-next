@@ -5,6 +5,7 @@ import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { API_URL } from "@/constants";
 import { useCallback, useState } from "react";
 import { getEncryptedImagePageLink } from "@/lib/encrypted-record";
+import { RecordType } from "@/types/encrypted-record";
 
 export function useUploadEncryptedImage() {
   const { sdk } = useRequestSDK();
@@ -14,7 +15,7 @@ export function useUploadEncryptedImage() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (file: File): Promise<string> => {
+    async (file: File) => {
       if (!file) throw new Error("No file provided");
       try {
         setUploading(true);
@@ -52,7 +53,7 @@ export function useUploadEncryptedImage() {
             ar_id: data.itemId,
             salt: btoa(String.fromCharCode(...salt)),
             iv: btoa(String.fromCharCode(...iv)),
-            type: "image",
+            type: RecordType.image,
           }),
         });
         const { data: logData } = logRes;
@@ -60,7 +61,10 @@ export function useUploadEncryptedImage() {
           throw new Error("Failed to log upload");
         }
         const arId = uploadRes.data.itemId;
-        return getEncryptedImagePageLink(arId);
+        return {
+          arId,
+          pageLink: getEncryptedImagePageLink(arId),
+        };
       } catch (error) {
         console.error("Image upload failed:", error);
         throw error;

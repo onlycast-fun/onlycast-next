@@ -13,6 +13,7 @@ import { getFarcasterUserPath } from "@/lib/farcaster/path";
 import { EncryptedText } from "./encrypted-text";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { formatMarketCap } from "@/lib/utils";
+import { EncryptedMultiContent } from "./encrypted-multi-content";
 
 interface PostCardProps {
   token?: Token;
@@ -22,7 +23,8 @@ interface PostCardProps {
 export function PostCard({ token, cast }: PostCardProps) {
   const { author, embeds } = cast;
   const formattedEmbeds = formatEmbeds(embeds);
-  const { imgs, encryptedTexts, encryptedImgs } = formattedEmbeds;
+  const { imgs, encryptedTexts, encryptedImgs, encryptedMultiContents } =
+    formattedEmbeds;
   return (
     <Card className="w-full transition-all hover:shadow-md">
       <CardContent className="flex flex-col gap-4">
@@ -90,6 +92,17 @@ export function PostCard({ token, cast }: PostCardProps) {
             <EncryptedImage
               key={idx}
               visitLink={img.url}
+              creatorToken={token}
+              className="w-full min-h-48 md:h-64 mb-4"
+            />
+          ))}
+
+        {/* Encrypted Multi Content */}
+        {encryptedMultiContents.length > 0 &&
+          encryptedMultiContents.map((multiContent, idx) => (
+            <EncryptedMultiContent
+              key={idx}
+              visitLink={multiContent.url}
               creatorToken={token}
               className="w-full min-h-48 md:h-64 mb-4"
             />

@@ -1,11 +1,13 @@
 import { usePrivy } from "@privy-io/react-auth";
-import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
-import { getEncryptedTextPageLink } from "@/lib/encrypted-record";
-import { RecordType } from "@/types/encrypted-record";
+import {
+  getEncryptedMultiContentPageLink,
+  getEncryptedTextPageLink,
+} from "@/lib/encrypted-record";
+import { RecordType, UnencryptedJson } from "@/types/encrypted-record";
 
-export function useUploadEncryptedText() {
+export function useUploadMultipleContent() {
   const { sdk } = useRequestSDK();
   const { user } = usePrivy();
   const userId = user?.id;
@@ -13,16 +15,10 @@ export function useUploadEncryptedText() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (text: string) => {
-      if (!text) throw new Error("No text provided");
+    async (jsonContent: UnencryptedJson) => {
+      if (!jsonContent) throw new Error("No JSON provided");
       try {
         setUploading(true);
-
-        // 1. 执行增强加密
-        const { encrypted, salt, iv } = await FrontendCrypto.encryptText(
-          text,
-          userId
-        );
 
         // 3. 上传到Arweave
         const uploadRes = await sdk.request<{
@@ -30,15 +26,13 @@ export function useUploadEncryptedText() {
           itemId: string;
           arUrl: string;
           arseedUrl: string;
-        }>(`/ar-upload/text`, {
+        }>(`/ar-upload/json`, {
           method: "POST",
-          body: JSON.stringify({
-            text: btoa(String.fromCharCode(...new Uint8Array(encrypted))),
-          }),
+          body: JSON.stringify(jsonContent),
         });
         const { data } = uploadRes;
         if (!data) {
-          throw new Error("Failed to upload text");
+          throw new Error("Failed to upload JSON");
         }
 
         // 4. 记录上传日志
@@ -46,9 +40,7 @@ export function useUploadEncryptedText() {
           method: "POST",
           body: JSON.stringify({
             ar_id: data.itemId,
-            salt: btoa(String.fromCharCode(...salt)),
-            iv: btoa(String.fromCharCode(...iv)),
-            type: RecordType.text,
+            type: RecordType.unencrypted_json,
           }),
         });
         const { data: logData } = logRes;
@@ -58,7 +50,7 @@ export function useUploadEncryptedText() {
         const arId = uploadRes.data.itemId;
         return {
           arId,
-          pageLink: getEncryptedTextPageLink(arId),
+          pageLink: getEncryptedMultiContentPageLink(arId),
         };
       } catch (error) {
         console.error("Text upload failed:", error);
@@ -67,7 +59,7 @@ export function useUploadEncryptedText() {
         setUploading(false);
       }
     },
-    [sdk, userId]
+    [sdk]
   );
 
   return { upload, uploading };
