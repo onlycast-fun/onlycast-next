@@ -93,7 +93,7 @@ export function PostCard({ token, cast }: PostCardProps) {
               key={idx}
               visitLink={img.url}
               creatorToken={token}
-              className="w-full min-h-48 md:h-64 mb-4"
+              className="w-full min-h-48 md:min-h-64 mb-4"
             />
           ))}
 
@@ -104,7 +104,7 @@ export function PostCard({ token, cast }: PostCardProps) {
               key={idx}
               visitLink={multiContent.url}
               creatorToken={token}
-              className="w-full min-h-48 md:h-64 mb-4"
+              className="w-full min-h-64 md:min-h-80 mb-4"
             />
           ))}
       </CardContent>
