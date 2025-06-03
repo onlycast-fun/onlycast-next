@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
 import { getDecryptionImageApiWithPageLink } from "@/lib/encrypted-record";
+import { useUserInfo } from "@/providers/userinfo-provider";
 
 interface EncryptedImageProps {
   visitLink: string;
@@ -22,8 +23,10 @@ export function EncryptedImage({
   const [imgUrl, setImgUrl] = useState<string>(visitLink);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { authenticated, login, user, linkWallet } = usePrivy();
-  const walletAddress = user?.wallet?.address || "";
+  const { authenticated, login } = usePrivy();
+  const { fcUser } = useUserInfo();
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+
   const api = getDecryptionImageApiWithPageLink(visitLink);
   const handleUnlock = async () => {
     if (!authenticated) {
@@ -31,9 +34,8 @@ export function EncryptedImage({
       login();
       return;
     }
-    if (!walletAddress) {
-      toast.error("Please connect a wallet that holds the $TEST tokens");
-      linkWallet();
+    if (!fcWalletAddress) {
+      toast.error("Please set the verified wallet address in Farcaster");
       return;
     }
 

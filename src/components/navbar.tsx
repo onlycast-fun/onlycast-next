@@ -10,7 +10,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", label: "Posts", icon: Home },
+    { href: "/", label: "Casts", icon: Home },
     { href: "/tokens", label: "Tokens", icon: Coins },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   ];

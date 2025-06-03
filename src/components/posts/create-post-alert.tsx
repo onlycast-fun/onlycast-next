@@ -1,5 +1,5 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useUser } from "@/providers/user-provider";
+import { useUserInfo } from "@/providers/userinfo-provider";
 import { usePrivy } from "@privy-io/react-auth";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -52,17 +52,14 @@ export function CheckUserLoginAlert({ login }: { login: () => void }) {
 }
 
 export function CreatePostAlert() {
-  const { user } = useUser();
+  const { tokens, fcUser } = useUserInfo();
   const { authenticated, login } = usePrivy();
   const { linkedExternalWallet, linkWallet } = useUserWallet();
-  const hasTokens = (user?.tokens?.length ?? 0) > 0;
+  const hasTokens = tokens && tokens.length > 0;
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0];
 
   if (!authenticated) {
     return <CheckUserLoginAlert login={login} />;
-  }
-
-  if (!linkedExternalWallet?.address) {
-    return <CheckLinkedWalletAlert linkWallet={linkWallet} />;
   }
 
   if (!hasTokens) {

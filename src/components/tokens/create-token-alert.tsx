@@ -2,25 +2,25 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePrivy } from "@privy-io/react-auth";
 import { AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
-import { useUser } from "@/providers/user-provider";
+import { useUserInfo } from "@/providers/userinfo-provider";
 import { Token } from "@/types";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
-import { useUserWallet } from "@/hooks/wallet/useUserWallet";
+import { getFarcasterVerifiedAddressPath } from "@/lib/farcaster/path";
 
-export function CheckLinkedWalletAlert({
-  linkWallet,
-}: {
-  linkWallet: () => void;
-}) {
+export function CheckFcWalletAlert() {
   return (
     <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
       <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
       <AlertDescription className="text-red-800 dark:text-red-200">
-        You need to link your wallet to create tokens.{" "}
-        <Button onClick={linkWallet} size={"sm"}>
-          Link Wallet
-        </Button>
+        You need to link a wallet to your account to create tokens.{" "}
+        <Link
+          href={getFarcasterVerifiedAddressPath()}
+          target="_blank"
+          className="font-medium underline hover:no-underline"
+        >
+          Add a wallet to your Farcaster account
+        </Link>
       </AlertDescription>
     </Alert>
   );
@@ -60,17 +60,17 @@ export function CheckUserTokensAlert({ token }: { token: Token }) {
 }
 
 export function CreateTokenAlert() {
-  const { user } = useUser();
+  const { tokens, fcUser } = useUserInfo();
   const { authenticated, login } = usePrivy();
-  const { linkedExternalWallet, linkWallet } = useUserWallet();
-  const token = user?.tokens?.[0];
+  const token = tokens?.[0];
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0];
 
   if (!authenticated) {
     return <CheckUserLoginAlert login={login} />;
   }
 
-  if (!linkedExternalWallet?.address) {
-    return <CheckLinkedWalletAlert linkWallet={linkWallet} />;
+  if (!fcWalletAddress) {
+    return <CheckFcWalletAlert />;
   }
 
   if (token) {

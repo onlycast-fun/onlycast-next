@@ -30,15 +30,14 @@ import {
   useFarcasterWrite,
 } from "@/hooks/farcaster/use-farcaster-write";
 import { openFarcasterCreateCast } from "@/lib/farcaster";
-import { useCheckPostActions } from "@/hooks/check-actions/use-check-post-actions";
-import { usePrivy } from "@privy-io/react-auth";
-import { useUser } from "@/providers/user-provider";
 import { CreatePostAlert } from "./create-post-alert";
 import { EncryptedImageUpload } from "./encrypted-image-upload";
 import Link from "next/link";
 import { useUploadEncryptedText } from "@/hooks/use-upload-text";
 import { useUploadMultipleContent } from "@/hooks/use-upload-multiple-content";
 import { UnencryptedJsonType } from "@/types/encrypted-record";
+import { usePrivy } from "@privy-io/react-auth";
+import { useUserInfo } from "@/providers/userinfo-provider";
 
 export function CreatePostDialog() {
   const [open, setOpen] = useState(false);
@@ -48,7 +47,7 @@ export function CreatePostDialog() {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
-          Create Post
+          Create Cast
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">
@@ -59,6 +58,10 @@ export function CreatePostDialog() {
 }
 
 function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
+  const { authenticated } = usePrivy();
+  const { tokens } = useUserInfo();
+  const hasTokens = (tokens?.length ?? 0) > 0;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreatePostData>({
@@ -76,29 +79,38 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { upload: uploadMultiContent, uploading: uploadingMultiContent } =
     useUploadMultipleContent();
   const { submitCast, writing } = useFarcasterWrite();
-  const { canCreatePost } = useCheckPostActions();
 
+  const disabled = !authenticated || hasTokens || writing || isSubmitting;
   const onSubmit = async (data: CreatePostData) => {
-    if (!canCreatePost) return;
-
     setIsSubmitting(true);
 
     try {
+      // 并行上传 text 和 image
+      const textPromise = data.encryptedContent
+        ? uploadText(data.encryptedContent)
+        : Promise.resolve(undefined);
+
+      const imagePromise = data.encryptedImage
+        ? uploadImage(data.encryptedImage)
+        : Promise.resolve(undefined);
+
+      const [textResult, imageResult] = await Promise.all([
+        textPromise,
+        imagePromise,
+      ]);
+
       let textPageLink: string | undefined;
       let textArId: string | undefined;
-      if (data.encryptedContent) {
-        const text = data.encryptedContent;
-        const { arId, pageLink } = await uploadText(text);
-        textPageLink = pageLink;
-        textArId = arId;
+      if (textResult) {
+        textPageLink = textResult.pageLink;
+        textArId = textResult.arId;
       }
+
       let imagePageLink: string | undefined;
       let imageArId: string | undefined;
-      if (data.encryptedImage) {
-        const file = data.encryptedImage;
-        const { arId, pageLink } = await uploadImage(file);
-        imagePageLink = pageLink;
-        imageArId = arId;
+      if (imageResult) {
+        imagePageLink = imageResult.pageLink;
+        imageArId = imageResult.arId;
       }
 
       // publish to Farcaster
@@ -167,7 +179,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
     <>
       {" "}
       <DialogHeader>
-        <DialogTitle>Create New Post</DialogTitle>
+        <DialogTitle>Create New Cast</DialogTitle>
       </DialogHeader>
       <CreatePostAlert />
       <Form {...form}>
@@ -182,7 +194,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                   <Textarea
                     placeholder="Say something to remind us not to miss it..."
                     className="min-h-[120px] resize-none"
-                    disabled={!canCreatePost || isSubmitting}
+                    disabled={disabled}
                     {...field}
                   />
                 </FormControl>
@@ -201,7 +213,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                   <Textarea
                     placeholder={`Record your exclusive news... \r\nOnly users who hold your token can view this content`}
                     className="min-h-[200px] resize-none border-primary"
-                    disabled={!canCreatePost || isSubmitting}
+                    disabled={disabled}
                     {...field}
                   />
                 </FormControl>
@@ -220,7 +232,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                   <EncryptedImageUpload
                     value={value}
                     onChange={onChange}
-                    disabled={!canCreatePost || isSubmitting}
+                    disabled={disabled}
                   />
                 </FormControl>
                 <FormMessage />
@@ -237,8 +249,8 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!canCreatePost || isSubmitting}>
-              {isSubmitting ? "Creating..." : "Create Post"}
+            <Button type="submit" disabled={disabled}>
+              {isSubmitting ? "Creating..." : "Create Cast"}
             </Button>
           </div>
         </form>

@@ -30,8 +30,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { CreateTokenAlert } from "./create-token-alert";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
-import { useUser } from "@/providers/user-provider";
 import { useUserWallet } from "@/hooks/wallet/useUserWallet";
+import { useUserInfo } from "@/providers/userinfo-provider";
 
 export function CreateTokenDialog() {
   const [open, setOpen] = useState(false);
@@ -71,6 +71,11 @@ export function CreateTokenContent({
 }: {
   setOpen: (open: boolean) => void;
 }) {
+  const { authenticated } = usePrivy();
+  const { tokens, setTokens, fcUser } = useUserInfo();
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  const hasTokens = (tokens?.length ?? 0) > 0;
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateTokenData>({
@@ -84,42 +89,24 @@ export function CreateTokenContent({
     },
   });
 
-  const { authenticated, login } = usePrivy();
-  const { linkedExternalWallet, linkWallet } = useUserWallet();
-  const { user, setUser } = useUser();
-  const hasTokens = (user?.tokens?.length ?? 0) > 0;
+  const { create, creating } = useCreateToken(fcWalletAddress);
 
-  const { create, creating } = useCreateToken();
+  const disabled =
+    !authenticated || !fcWalletAddress || hasTokens || creating || isSubmitting;
 
   const onSubmit = async (data: CreateTokenData) => {
-    if (!authenticated) {
-      login();
-      return;
-    }
-    if (!linkedExternalWallet) {
-      linkWallet();
-      return;
-    }
-    if (hasTokens) {
-      return;
-    }
     try {
       setIsSubmitting(true);
       const token = await create(data);
-      setUser((prev) => {
+      setTokens((prev) => {
         if (!prev) {
-          return {
-            tokens: [token],
-          };
+          return [token];
         }
-        return {
-          ...prev,
-          tokens: [token],
-        };
+        return [...prev, token];
       });
       if (token.token_address) {
         toast.success(
-          <div>
+          <div className="flex items-center gap-2 p-2">
             Token created successfully!{" "}
             <Link
               href={getClankerTokenPath(token.token_address)}
@@ -145,13 +132,6 @@ export function CreateTokenContent({
       setIsSubmitting(false);
     }
   };
-
-  const disabled =
-    !authenticated ||
-    !linkedExternalWallet?.address ||
-    hasTokens ||
-    creating ||
-    isSubmitting;
 
   return (
     <>
@@ -220,7 +200,7 @@ export function CreateTokenContent({
             )}
           />
 
-          <FormField
+          {/* <FormField
             control={form.control}
             name="percentage"
             render={({ field }) => (
@@ -263,7 +243,7 @@ export function CreateTokenContent({
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
 
           <div className="flex justify-end space-x-3">
             <Button

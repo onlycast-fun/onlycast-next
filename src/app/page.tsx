@@ -13,9 +13,10 @@ import {
 import { PostCard } from "@/components/posts/post-card";
 import { CreatePostDialog } from "@/components/posts/create-post-dialog";
 import { useTrendingPosts } from "@/hooks/post/use-trending-posts";
+import { PostsSkeleton } from "@/components/posts/pots-skeleton";
 
 export default function PostsPage() {
-  const [sortBy, setSortBy] = useState("latest");
+  const [sortBy, setSortBy] = useState("trending");
 
   const {
     data,
@@ -37,13 +38,36 @@ export default function PostsPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="latest">Latest</SelectItem>
-            <SelectItem value="hot">Hot</SelectItem>
+            <SelectItem value="trending">Trending</SelectItem>
+            {/* <SelectItem value="new">New</SelectItem> */}
           </SelectContent>
         </Select>
 
         <CreatePostDialog />
       </div>
+
+      {/* Loading State */}
+      {isFetching && (
+        <div className="mb-8">
+          <PostsSkeleton count={5} />
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isFetching && (
+        <div className="text-center py-16">
+          <h3 className="text-lg font-semibold text-destructive mb-2">
+            Error Loading Posts
+          </h3>
+          <p className="text-muted-foreground mb-4">{error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-primary hover:text-primary/80 underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* Posts List */}
       <div className="space-y-4 mb-8">

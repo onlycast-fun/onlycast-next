@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { ThemeProvider } from "./theme-provider";
 import { RequestSDKProvider } from "./request-sdk-provider";
-import { UserProvider } from "./user-provider";
+import { UserProvider } from "./userinfo-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 dayjs.extend(relativeTime);
 

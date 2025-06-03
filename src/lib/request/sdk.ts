@@ -8,6 +8,7 @@ import {
   Token,
   UploadImageResponse,
 } from "@/types";
+import { LeaderboardItemData } from "@/types/leaderboard";
 
 export class RequestSdk {
   private apiUrl: string;
@@ -126,10 +127,6 @@ export class RequestSdk {
     );
   }
 
-  async getFarcasterUser(fid: number) {
-    return await this.request<FarcasterUser>(`/farcaster/users/${fid}`);
-  }
-
   async getFarcasterChannel(channelId: string) {
     return await this.request<FarcasterChannel>(
       `/farcaster/channels/${channelId}`
@@ -155,6 +152,7 @@ export class RequestSdk {
   }
 
   async addToken(data: {
+    creatorAddress: string;
     name: string;
     symbol: string;
     image: string;
@@ -165,7 +163,7 @@ export class RequestSdk {
     };
     vault?: { percentage?: number; durationInDays?: number };
   }) {
-    return await this.request<Token>(`/tokens`, {
+    return await this.request<{ data: Token }>(`/tokens`, {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -184,21 +182,7 @@ export class RequestSdk {
     );
   }
 
-  async getLeaderboard(
-    timeframe: "all-time" | "week" | "last-week",
-    community?: string
-  ) {
-    return await this.request<{
-      data: {
-        score: number;
-        posts: number;
-        likes: number;
-        replies: number;
-      }[];
-    }>(
-      `/leaderboard?timeframe=${timeframe}${
-        community ? `&community=${community}` : ""
-      }`
-    );
+  async getLeaderboards() {
+    return await this.request<{ data: LeaderboardItemData[] }>("/leaderboards");
   }
 }

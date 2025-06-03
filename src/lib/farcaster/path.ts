@@ -5,3 +5,7 @@ export const getFarcasterUserPath = (fname: string) => {
 export const getFarcasterChannelPath = (channelId: string) => {
   return `${FC_HOST}/~/channel/${channelId}`;
 };
+
+export const getFarcasterVerifiedAddressPath = () => {
+  return `${FC_HOST}/~/settings/verified-addresses`;
+};

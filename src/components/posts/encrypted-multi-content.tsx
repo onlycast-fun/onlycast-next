@@ -11,6 +11,7 @@ import {
   getDecryptionMultiContentApiWithPageLink,
   getDecryptionTextApiWithArid,
 } from "@/lib/encrypted-record";
+import { useUserInfo } from "@/providers/userinfo-provider";
 
 interface EncryptedMultiContentProps {
   visitLink: string;
@@ -29,8 +30,9 @@ export function EncryptedMultiContent({
   const [imgUrl, setImgUrl] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { authenticated, login, user, linkWallet } = usePrivy();
-  const walletAddress = user?.wallet?.address || "";
+  const { authenticated, login } = usePrivy();
+  const { fcUser } = useUserInfo();
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
 
   const handleUnlock = async () => {
     if (!authenticated) {
@@ -38,9 +40,8 @@ export function EncryptedMultiContent({
       login();
       return;
     }
-    if (!walletAddress) {
-      toast.error("Please connect a wallet that holds the $TEST tokens");
-      linkWallet();
+    if (!fcWalletAddress) {
+      toast.error("Please set the verified wallet address in Farcaster");
       return;
     }
 
@@ -58,31 +59,32 @@ export function EncryptedMultiContent({
       });
       const jsonContent = await response.json();
       const { text_ar_id, image_ar_id } = jsonContent || {};
-      if (text_ar_id) {
-        const textApi = getDecryptionTextApiWithArid(text_ar_id);
-        console.log("API:", textApi);
-        const response = await fetch(textApi, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const decryptedText = await response.text();
-        setText(decryptedText);
-      }
 
-      if (image_ar_id) {
-        const imageApi = getDecryptionImageApiWithArid(image_ar_id);
-        console.log("Image API:", imageApi);
-        const imageResponse = await fetch(imageApi, {
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const blob = await imageResponse.blob();
-        setImgUrl(URL.createObjectURL(blob));
-      }
+      const textPromise = text_ar_id
+        ? fetch(getDecryptionTextApiWithArid(text_ar_id), {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }).then((res) => res.text())
+        : Promise.resolve("");
+
+      const imagePromise = image_ar_id
+        ? fetch(getDecryptionImageApiWithArid(image_ar_id), {
+            headers: {
+              Accept: "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }).then((res) => res.blob())
+        : Promise.resolve(null);
+
+      const [decryptedText, imageBlob] = await Promise.all([
+        textPromise,
+        imagePromise,
+      ]);
+
+      if (decryptedText) setText(decryptedText);
+      if (imageBlob) setImgUrl(URL.createObjectURL(imageBlob));
 
       setIsUnlocked(true);
     } catch (error) {

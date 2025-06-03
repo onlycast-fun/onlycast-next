@@ -13,6 +13,7 @@ import {
 import { TokenCard } from "@/components/tokens/token-card";
 import { CreateTokenDialog } from "@/components/tokens/create-token-dialog";
 import { useTokens } from "@/hooks/token/use-tokens";
+import { TokensSkeleton } from "@/components/tokens/token-skeleton";
 
 export default function TokensPage() {
   const [sortBy, setSortBy] = useState("marketcap");
@@ -36,13 +37,36 @@ export default function TokensPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="marketcap">By Market Cap</SelectItem>
-            <SelectItem value="time">By Time</SelectItem>
+            <SelectItem value="marketcap">Market Cap</SelectItem>
+            {/* <SelectItem value="new">New</SelectItem> */}
           </SelectContent>
         </Select>
 
         <CreateTokenDialog />
       </div>
+
+      {/* Loading State */}
+      {isFetching && (
+        <div className="mb-8">
+          <TokensSkeleton count={6} />
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isFetching && (
+        <div className="text-center py-16">
+          <h3 className="text-lg font-semibold text-destructive mb-2">
+            Error Loading Tokens
+          </h3>
+          <p className="text-muted-foreground mb-4">{error.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-primary hover:text-primary/80 underline"
+          >
+            Try again
+          </button>
+        </div>
+      )}
 
       {/* Token Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-8">

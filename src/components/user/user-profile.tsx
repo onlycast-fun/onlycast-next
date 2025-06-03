@@ -12,23 +12,28 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { formatMarketCap, shortPubKey } from "@/lib/utils";
-import { useUser } from "@/providers/user-provider";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { useFarcasterAccount } from "@/hooks/farcaster/use-farcaster-account";
 import { useUserWallet } from "@/hooks/wallet/useUserWallet";
+import { useUserInfo } from "@/providers/userinfo-provider";
+import { getFarcasterVerifiedAddressPath } from "@/lib/farcaster/path";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 export function UserProfile() {
-  const { user } = useUser();
-  const tokens = user?.tokens || [];
   const { ready, authenticated, logout, user: privyUser, login } = usePrivy();
+  const { tokens, fcUser } = useUserInfo();
+  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
 
-  const { linkedWallet, linkWallet, unlinkWallet } = useUserWallet();
-  const linkedWalletAddress = linkedWallet?.address || "";
-  const copyAddress = () => {
-    if (linkedWalletAddress) {
-      navigator.clipboard.writeText(linkedWalletAddress);
+  // const { linkedExternalWallet, linkWallet, unlinkWallet } = useUserWallet();
+  const { farcasterAccount } = useFarcasterAccount();
+
+  // const linkedExternalWalletAddress = linkedExternalWallet?.address || "";
+
+  const copyAddress = (address: string) => {
+    if (address) {
+      navigator.clipboard.writeText(address);
       toast.success("Wallet address copied!");
     }
   };
@@ -52,12 +57,23 @@ export function UserProfile() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
-          <Wallet className="w-4 h-4" />
+        <Button variant="outline" size="default" className="gap-2">
+          {/* <Wallet className="w-4 h-4" /> */}
+          <Avatar className="w-6 h-6">
+            <AvatarImage
+              src={farcasterAccount?.pfp || "/placeholder.svg"}
+              alt={farcasterAccount?.displayName || ""}
+            />
+            <AvatarFallback>
+              {farcasterAccount?.displayName?.[0] || ""}
+            </AvatarFallback>
+          </Avatar>
           <span className="hidden sm:inline">
-            {shortPubKey(privyUser?.id || "")}
+            {farcasterAccount?.displayName || farcasterAccount?.username}
           </span>
-          <span className="sm:hidden">{shortPubKey(privyUser?.id || "")}</span>
+          <span className="sm:hidden">
+            {farcasterAccount?.displayName || farcasterAccount?.username}
+          </span>
           <ChevronDown className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -65,48 +81,38 @@ export function UserProfile() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col gap-1">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">Linked Wallet</p>
+              <p className="text-sm font-medium leading-none">Wallets</p>
             </div>
-            {linkedWalletAddress ? (
+            {fcWalletAddress ? (
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <span className="text-xs leading-none text-muted-foreground">
-                    {shortPubKey(linkedWalletAddress)}
+                    {shortPubKey(fcWalletAddress)}
                   </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={copyAddress}
-                    className="h-8 w-8 p-0 hover:bg-muted"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    unlinkWallet(linkedWalletAddress);
-                    toast.success("Wallet unlinked successfully!");
+                    copyAddress(fcWalletAddress);
                   }}
                   className="h-8 w-8 p-0 hover:bg-muted"
                 >
-                  <Unlink className="w-4 h-4" />
+                  <Copy className="w-4 h-4" />
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col px-2 py-4 gap-2 items-center justify-between">
                 <span className="text-xs leading-none text-muted-foreground">
-                  No wallet linked
+                  No verified wallet address found.
                 </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => linkWallet()}
-                  className="h-8 w-8 p-0 hover:bg-muted"
+                <Link
+                  href={getFarcasterVerifiedAddressPath()}
+                  target="_blank"
+                  className="text-xs text-primary hover:underline"
                 >
-                  <Wallet className="w-4 h-4" />
-                </Button>
+                  Add address to Farcaster
+                </Link>
               </div>
             )}
           </div>

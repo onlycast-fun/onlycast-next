@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatMarketCap } from "@/lib/utils";
 import { Token } from "@/types";
 import dayjs from "dayjs";
-import { Button } from "../ui/button";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 

@@ -2,13 +2,16 @@ import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
 import { CreateTokenData } from "@/lib/schemas";
 
-export function useCreateToken() {
+export function useCreateToken(creatorAddress: string) {
   const { sdk } = useRequestSDK();
 
   const [creating, setCreating] = useState(false);
 
   const create = useCallback(
     async (data: CreateTokenData) => {
+      if (!creatorAddress) {
+        throw new Error("Creator address is required");
+      }
       try {
         setCreating(true);
         const res = await sdk.addToken({
@@ -19,8 +22,9 @@ export function useCreateToken() {
             percentage: data.percentage,
             durationInDays: data.durationInDays,
           },
+          creatorAddress,
         });
-        const { data: token } = res;
+        const token = res.data?.data;
         if (!token) {
           throw new Error("Token creation failed");
         }
@@ -33,7 +37,7 @@ export function useCreateToken() {
         setCreating(false);
       }
     },
-    [sdk]
+    [sdk, creatorAddress]
   );
 
   return { create, creating };
