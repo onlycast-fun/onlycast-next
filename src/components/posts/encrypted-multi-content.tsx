@@ -57,6 +57,12 @@ export function EncryptedMultiContent({
           Authorization: `Bearer ${token}`,
         },
       });
+      if (!response.ok) {
+        toast.error("Failed to fetch content info");
+        setIsLoading(false);
+        return;
+      }
+
       const jsonContent = await response.json();
       const { text_ar_id, image_ar_id } = jsonContent || {};
 
@@ -66,8 +72,11 @@ export function EncryptedMultiContent({
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }).then((res) => res.text())
-        : Promise.resolve("");
+          }).then(async (res) => {
+            if (!res.ok) return null;
+            return await res.text();
+          })
+        : Promise.resolve(null);
 
       const imagePromise = image_ar_id
         ? fetch(getDecryptionImageApiWithArid(image_ar_id), {
@@ -75,13 +84,22 @@ export function EncryptedMultiContent({
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }).then((res) => res.blob())
+          }).then(async (res) => {
+            if (!res.ok) return null;
+            return await res.blob();
+          })
         : Promise.resolve(null);
 
       const [decryptedText, imageBlob] = await Promise.all([
         textPromise,
         imagePromise,
       ]);
+
+      if (!decryptedText && !imageBlob) {
+        toast.error("Failed to decrypt any content");
+        setIsLoading(false);
+        return;
+      }
 
       if (decryptedText) setText(decryptedText);
       if (imageBlob) setImgUrl(URL.createObjectURL(imageBlob));

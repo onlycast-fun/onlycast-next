@@ -49,9 +49,14 @@ export function EncryptedImage({
           Authorization: `Bearer ${token}`,
         },
       });
-      const blob = await response.blob();
-      setImgUrl(URL.createObjectURL(blob));
-      setIsUnlocked(true);
+      if (response.ok) {
+        const blob = await response.blob();
+        setImgUrl(URL.createObjectURL(blob));
+        setIsUnlocked(true);
+      } else {
+        const errorText = await response.text();
+        toast.error(errorText || "Failed to unlock image");
+      }
     } catch (error) {
       toast.error("Verification failed, please try again");
     } finally {

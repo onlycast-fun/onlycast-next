@@ -80,7 +80,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
     useUploadMultipleContent();
   const { submitCast, writing } = useFarcasterWrite();
 
-  const disabled = !authenticated || hasTokens || writing || isSubmitting;
+  const disabled = !authenticated || !hasTokens || writing || isSubmitting;
   const onSubmit = async (data: CreatePostData) => {
     setIsSubmitting(true);
 

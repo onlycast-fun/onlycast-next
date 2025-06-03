@@ -51,9 +51,14 @@ export function EncryptedText({
           Authorization: `Bearer ${token}`,
         },
       });
-      const decryptedText = await response.text();
-      setText(decryptedText);
-      setIsUnlocked(true);
+      if (response.ok) {
+        const decryptedText = await response.text();
+        setText(decryptedText);
+        setIsUnlocked(true);
+      } else {
+        const errorText = await response.text();
+        toast.error(errorText || "Failed to unlock text");
+      }
     } catch (error) {
       toast.error("Verification failed, please try again");
     } finally {
