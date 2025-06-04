@@ -1,13 +1,18 @@
 "use client";
 
-import { LeaderboardItem } from "@/components/leaderboard/leaderboard-item";
+import { useState } from "react";
 import { Trophy } from "lucide-react";
-import { LeaderboardSkeleton } from "@/components/leaderboard/leaderboard-skeleton";
-import { useLeaderboards } from "@/hooks/leaderboard/use-leaderboards";
+import { LeaderboardTabs } from "@/components/leaderboard/leaderboard-tabs";
 
 export default function LeaderboardPage() {
-  const { data, isLoading, error } = useLeaderboards();
-  const items = data || [];
+  const [activeTab, setActiveTab] = useState<"leaderboard" | "airdrop">(
+    "leaderboard"
+  );
+
+  const handleTabChange = (tab: "leaderboard" | "airdrop") => {
+    setActiveTab(tab);
+    // Additional logic can be added here if needed
+  };
 
   return (
     <div className="min-h-screen bg-background pt-14 md:pt-16 pb-20 md:pb-6">
@@ -25,51 +30,11 @@ export default function LeaderboardPage() {
           </p>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="mb-8">
-            <LeaderboardSkeleton count={10} />
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && !isLoading && (
-          <div className="text-center py-16">
-            <Trophy className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-destructive mb-2">
-              Error Loading Data
-            </h3>
-            <p className="text-muted-foreground mb-4">{error.message}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="text-primary hover:text-primary/80 underline"
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {/* Leaderboard List */}
-        {!isLoading && !error && items.length > 0 && (
-          <div className="space-y-3 mb-8">
-            {items.map((data) => (
-              <LeaderboardItem key={data.user.custody_address} data={data} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!isLoading && !error && items.length === 0 && (
-          <div className="text-center py-16">
-            <Trophy className="w-16 h-16 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-              No ranking data yet
-            </h3>
-            <p className="text-muted-foreground">
-              Check back later for leaderboard updates
-            </p>
-          </div>
-        )}
+        {/* Leaderboard Tabs */}
+        <LeaderboardTabs
+          defaultTab="leaderboard"
+          onTabChange={handleTabChange}
+        />
       </div>
     </div>
   );
