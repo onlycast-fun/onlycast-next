@@ -8,6 +8,7 @@ import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
 import { getDecryptionImageApiWithPageLink } from "@/lib/encrypted-record";
 import { useUserInfo } from "@/providers/userinfo-provider";
+import { UnlockOverlay } from "./unlock-overlay";
 
 interface EncryptedImageProps {
   visitLink: string;
@@ -65,36 +66,23 @@ export function EncryptedImage({
   };
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg", className)}>
-      <img
-        src={imgUrl}
-        className={cn(
-          "w-full h-full object-cover transition-all duration-300",
-          !isUnlocked && "blur-[10px]"
-        )}
-      />
-
-      {!isUnlocked && (
-        <div
-          className="absolute inset-0 bg-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-neutral-500"
-          onClick={handleUnlock}
-        >
-          <Lock
-            className={cn(
-              "w-8 h-8 text-white mb-3 transition-transform",
-              isLoading && "animate-pulse"
-            )}
-          />
-          <p className="text-white text-base font-semibold mb-1">
-            {isLoading ? "Verifying..." : "Click to view image"}
-          </p>
-          <p className="text-white/90 text-sm text-center px-4">
-            {isLoading
-              ? "Checking token ownership..."
-              : `Hold $${creatorToken?.symbol} tokens to unlock`}
-          </p>
-        </div>
-      )}
-    </div>
+    <UnlockOverlay
+      creatorToken={creatorToken?.symbol || ""}
+      requiredAmount={10000}
+      contentType="image"
+      isUnlocked={isUnlocked}
+      isLoading={isLoading}
+      onUnlockClick={handleUnlock}
+    >
+      <div className={cn("relative overflow-hidden rounded-lg", className)}>
+        <img
+          src={imgUrl}
+          className={cn(
+            "w-full h-full object-cover transition-all duration-300",
+            !isUnlocked && "blur-[10px]"
+          )}
+        />
+      </div>
+    </UnlockOverlay>
   );
 }

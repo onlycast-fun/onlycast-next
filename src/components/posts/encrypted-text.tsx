@@ -8,6 +8,7 @@ import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
 import { getDecryptionTextApiWithPageLink } from "@/lib/encrypted-record";
 import { useUserInfo } from "@/providers/userinfo-provider";
+import { UnlockOverlay } from "./unlock-overlay";
 
 interface EncryptedTextProps {
   visitLink: string;
@@ -67,37 +68,24 @@ export function EncryptedText({
   };
 
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-lg bg-accent min-h-[150px] p-4 flex items-center justify-center",
-        className
-      )}
+    <UnlockOverlay
+      creatorToken={creatorToken?.symbol || ""}
+      requiredAmount={10000}
+      contentType="text"
+      isUnlocked={isUnlocked}
+      isLoading={isLoading}
+      onUnlockClick={handleUnlock}
     >
-      <span className="text-accent-foreground text-sm md:text-base font-mono whitespace-pre-wrap break-words transition-all duration-300">
-        {text}
-      </span>
-
-      {!isUnlocked && (
-        <div
-          className="w-full h-full absolute inset-0 bg-neutral-400 flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-neutral-500"
-          onClick={handleUnlock}
-        >
-          <Lock
-            className={cn(
-              "w-8 h-8 text-white mb-3 transition-transform",
-              isLoading && "animate-pulse"
-            )}
-          />
-          <p className="text-white text-base font-semibold mb-1">
-            {isLoading ? "Verifying..." : "Click to view text"}
-          </p>
-          <p className="text-white/90 text-sm text-center px-4">
-            {isLoading
-              ? "Checking token ownership..."
-              : `Hold $${creatorToken?.symbol} tokens to unlock`}
-          </p>
-        </div>
-      )}
-    </div>
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-lg bg-accent min-h-[300px] p-4 flex items-center justify-center",
+          className
+        )}
+      >
+        <span className="text-accent-foreground text-sm md:text-base font-mono whitespace-pre-wrap break-words transition-all duration-300">
+          {text}
+        </span>
+      </div>
+    </UnlockOverlay>
   );
 }
