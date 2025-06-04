@@ -28,11 +28,11 @@ export function LeaderboardTabs({
       onValueChange={handleTabChange}
     >
       <TabsList className="grid w-full grid-cols-2 mb-8">
-        <TabsTrigger value="leaderboard" className="gap-2">
+        <TabsTrigger value="leaderboard" className="gap-2 cursor-pointer">
           <Trophy className="w-4 h-4" />
           Leaderboard
         </TabsTrigger>
-        <TabsTrigger value="airdrop" className="gap-2">
+        <TabsTrigger value="airdrop" className="gap-2 cursor-pointer">
           <Gift className="w-4 h-4" />
           Airdrop Info
         </TabsTrigger>
