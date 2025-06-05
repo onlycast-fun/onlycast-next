@@ -21,7 +21,6 @@ interface PostCardProps {
 
 export function RecordInfoCard({ author, token, record }: PostCardProps) {
   const arid = record.ar_id;
-  console.log("RecordInfoCard", { arid, author, token, record });
   const fcUser = author.farcaster;
   return (
     <Card className="w-full transition-all hover:shadow-md">

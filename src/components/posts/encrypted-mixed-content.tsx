@@ -51,7 +51,6 @@ export function EncryptedMixedContent({
     try {
       const token = await getAccessToken();
       const api = getDecryptionMixedContentApiWithArid(arid);
-      console.log("API:", api);
       const response = await fetch(api, {
         headers: {
           Accept: "application/json",

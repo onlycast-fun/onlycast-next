@@ -11,7 +11,6 @@ export function useTrendingPosts(limit: number) {
         cursor: pageParam,
         limit: limit,
       });
-      console.log("trending posts", res.data);
       const resData = res?.data?.data;
       return {
         data: resData?.data || [],

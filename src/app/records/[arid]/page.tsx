@@ -2,7 +2,7 @@ import { RecordInfoCard } from "@/components/posts/record-info-card";
 import { API_URL, ONLYCAST_HOST } from "@/constants";
 import { Token } from "@/types";
 import { EncryptedRecord } from "@/types/encrypted-record";
-import { Author } from "@/types/neynar";
+import { User } from "@privy-io/react-auth";
 
 import type { Metadata } from "next";
 
@@ -51,7 +51,7 @@ export default async function EncryptedTextPage({
   const data = await res.json();
   const { tokens, user, record } = data as {
     tokens: Token[];
-    user: Author;
+    user: User;
     record: EncryptedRecord;
   };
   const token = tokens[0];

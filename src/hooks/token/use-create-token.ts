@@ -28,7 +28,6 @@ export function useCreateToken(creatorAddress: string) {
         if (!token) {
           throw new Error("Token creation failed");
         }
-        console.log("Token created successfully:", token);
         return token;
       } catch (error) {
         console.error("Token creation failed:", error);
