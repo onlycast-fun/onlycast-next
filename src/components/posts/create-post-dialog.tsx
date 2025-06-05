@@ -133,7 +133,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
 
       if (!!textArId && !!imageArId) {
         const { pageLink } = await uploadMultiContent({
-          type: UnencryptedJsonType.emc,
+          type: UnencryptedJsonType.mc,
           text_ar_id: textArId,
           image_ar_id: imageArId,
         });

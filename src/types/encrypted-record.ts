@@ -4,7 +4,7 @@ export enum RecordType {
   mixed = "mixed",
 }
 export enum UnencryptedJsonType {
-  emc = "encrypted-multiple-content",
+  mc = "mixed-content",
 }
 export type UnencryptedJson = {
   type: UnencryptedJsonType;
