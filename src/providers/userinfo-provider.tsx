@@ -54,7 +54,6 @@ export function UserProvider({ children }: { children: ReactNode }) {
       const fetchFcUser = async () => {
         try {
           const res = await getFcUsers([fid]);
-          console.log("Fetched Farcaster user:", res);
           const user = res.users.find((u) => u.fid === fid);
           if (user) {
             setFcUser(user);
