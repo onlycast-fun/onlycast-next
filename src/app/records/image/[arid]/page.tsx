@@ -1,5 +1,9 @@
 import { EncryptedImage } from "@/components/posts/encrypted-image";
-import { ONLYCAST_HOST } from "@/constants";
+import { RecordInfoCard } from "@/components/posts/record-info-card";
+import { API_URL, ONLYCAST_HOST } from "@/constants";
+import { Token } from "@/types";
+import { EncryptedRecord } from "@/types/encrypted-record";
+import { Author } from "@/types/neynar";
 
 import type { Metadata } from "next";
 
@@ -44,9 +48,17 @@ export default async function EncryptedImagePage({
   params: Promise<{ arid: string }>;
 }) {
   const { arid } = await params;
+  const res = await fetch(`${API_URL}/encrypted-records/infos/${arid}`);
+  const data = await res.json();
+  const { tokens, user, record } = data as {
+    tokens: Token[];
+    user: Author;
+    record: EncryptedRecord;
+  };
+  const token = tokens[0];
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <EncryptedImage className="w-full min-h-48 md:h-64 mb-4" arid={arid} />
+      <RecordInfoCard author={user} token={token} record={record} />
     </div>
   );
 }
