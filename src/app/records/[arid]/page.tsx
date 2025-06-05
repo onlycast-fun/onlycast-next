@@ -1,8 +1,7 @@
-import { EncryptedImage } from "@/components/posts/encrypted-image";
-import { EncryptedText } from "@/components/posts/encrypted-text";
+import { RecordInfoCard } from "@/components/posts/record-info-card";
 import { API_URL, ONLYCAST_HOST } from "@/constants";
 import { Token } from "@/types";
-import { EncryptedRecord, RecordType } from "@/types/encrypted-record";
+import { EncryptedRecord } from "@/types/encrypted-record";
 import { Author } from "@/types/neynar";
 
 import type { Metadata } from "next";
@@ -55,33 +54,10 @@ export default async function EncryptedTextPage({
     user: Author;
     record: EncryptedRecord;
   };
-  if (record.type === RecordType.text) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <EncryptedText arid={arid} creatorToken={tokens[0]} />
-      </div>
-    );
-  }
-  if (record.type === RecordType.image) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <EncryptedImage
-          className="w-full min-h-48 md:h-64 mb-4"
-          arid={arid}
-          creatorToken={tokens[0]}
-        />
-      </div>
-    );
-  }
-  if (record.type === RecordType.mixed) {
-    return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <EncryptedImage
-          className="w-full min-h-48 md:h-64 mb-4"
-          arid={arid}
-          creatorToken={tokens[0]}
-        />
-      </div>
-    );
-  }
+  const token = tokens[0];
+  return (
+    <div className="container mx-auto px-4 py-6 max-w-2xl">
+      <RecordInfoCard author={user} token={token} record={record} />
+    </div>
+  );
 }

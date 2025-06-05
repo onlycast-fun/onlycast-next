@@ -4,7 +4,7 @@ import { useCallback, useState } from "react";
 import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 import { RecordType, UnencryptedJson } from "@/types/encrypted-record";
 
-export function useUploadMultipleContent() {
+export function useUploadMixedContent() {
   const { sdk } = useRequestSDK();
   const { user } = usePrivy();
   const userId = user?.id;
@@ -12,7 +12,7 @@ export function useUploadMultipleContent() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (jsonContent: UnencryptedJson) => {
+    async (jsonContent: UnencryptedJson, description?: string) => {
       if (!jsonContent) throw new Error("No JSON provided");
       try {
         setUploading(true);
@@ -38,6 +38,7 @@ export function useUploadMultipleContent() {
           body: JSON.stringify({
             ar_id: data.itemId,
             type: RecordType.mixed,
+            description: description || "",
           }),
         });
         const { data: logData } = logRes;

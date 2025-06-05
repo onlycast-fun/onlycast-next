@@ -13,7 +13,7 @@ export function useUploadEncryptedText() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (text: string) => {
+    async (text: string, description?: string) => {
       if (!text) throw new Error("No text provided");
       try {
         setUploading(true);
@@ -49,6 +49,7 @@ export function useUploadEncryptedText() {
             salt: btoa(String.fromCharCode(...salt)),
             iv: btoa(String.fromCharCode(...iv)),
             type: RecordType.text,
+            description: description || "",
           }),
         });
         const { data: logData } = logRes;

@@ -39,7 +39,7 @@ import { openFarcasterCreateCast } from "@/lib/farcaster";
 import { CreatePostAlert } from "./create-post-alert";
 import { EncryptedImageUpload } from "./encrypted-image-upload";
 import { useUploadEncryptedText } from "@/hooks/use-upload-text";
-import { useUploadMultipleContent } from "@/hooks/use-upload-multiple-content";
+import { useUploadMixedContent } from "@/hooks/use-upload-mixed-content";
 import { UnencryptedJsonType } from "@/types/encrypted-record";
 import { usePrivy } from "@privy-io/react-auth";
 import { useUserInfo } from "@/providers/userinfo-provider";
@@ -91,7 +91,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
   const { upload: uploadImage, uploading: uploadingImage } =
     useUploadEncryptedImage();
   const { upload: uploadMultiContent, uploading: uploadingMultiContent } =
-    useUploadMultipleContent();
+    useUploadMixedContent();
   // const { submitCast, writing } = useFarcasterWrite();
 
   const disabled = !authenticated || !hasTokens || isSubmitting;

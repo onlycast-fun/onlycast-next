@@ -13,7 +13,7 @@ export function useUploadEncryptedImage() {
   const [uploading, setUploading] = useState(false);
 
   const upload = useCallback(
-    async (file: File) => {
+    async (file: File, description?: string) => {
       if (!file) throw new Error("No file provided");
       try {
         setUploading(true);
@@ -52,6 +52,7 @@ export function useUploadEncryptedImage() {
             salt: btoa(String.fromCharCode(...salt)),
             iv: btoa(String.fromCharCode(...iv)),
             type: RecordType.image,
+            description: description || "",
           }),
         });
         const { data: logData } = logRes;
