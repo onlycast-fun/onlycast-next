@@ -86,7 +86,7 @@ export async function getOgResponse({
                 padding: "16px 24px",
                 borderRadius: "16px",
                 border: "1px solid #e2e8f0", // border
-                fontSize: "24px",
+                fontSize: "32px",
                 fontWeight: "500",
               }}
             >
@@ -104,7 +104,7 @@ export async function getOgResponse({
                 color: "white",
                 padding: "16px 24px",
                 borderRadius: "16px",
-                fontSize: "24px",
+                fontSize: "32px",
                 fontWeight: "600",
               }}
             >
