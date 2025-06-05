@@ -83,14 +83,14 @@ export async function getOgResponse({
                 gap: "8px",
                 backgroundColor: "rgba(255, 255, 255, 0.8)", // background/80
                 color: "#0f172a", // foreground
-                padding: "8px 16px",
+                padding: "16px 24px",
                 borderRadius: "16px",
                 border: "1px solid #e2e8f0", // border
-                fontSize: "14px",
+                fontSize: "24px",
                 fontWeight: "500",
               }}
             >
-              <span style={{ fontSize: "16px" }}>{contentInfo.icon}</span>
+              <span style={{ fontSize: "24px" }}>{contentInfo.icon}</span>
               <span>{contentInfo.badgeText}</span>
             </div>
 
@@ -102,9 +102,9 @@ export async function getOgResponse({
                 gap: "4px",
                 background: "linear-gradient(45deg, #eab308, #ea580c)", // yellow-500 to orange-500
                 color: "white",
-                padding: "8px 16px",
+                padding: "16px 24px",
                 borderRadius: "16px",
-                fontSize: "14px",
+                fontSize: "24px",
                 fontWeight: "600",
               }}
             >
@@ -124,7 +124,7 @@ export async function getOgResponse({
           >
             <span
               style={{
-                fontSize: "48px",
+                fontSize: "100px",
                 color: "#64748b", // muted-foreground/50
                 opacity: 0.5,
               }}
@@ -167,14 +167,14 @@ export async function getOgResponse({
                   color: "white", // primary-foreground
                   padding: "16px 32px",
                   borderRadius: "50px", // Full pill shape
-                  fontSize: "18px",
+                  fontSize: "48px",
                   fontWeight: "600",
                   width: "100%",
                   justifyContent: "center",
-                  minHeight: "48px", // h-12 equivalent
+                  minHeight: "60px", // h-12 equivalent
                 }}
               >
-                <span style={{ fontSize: "20px", color: "#fbbf24" }}>🪙</span>
+                <span style={{ fontSize: "48px", color: "#fbbf24" }}>🪙</span>
                 <span>
                   Hold {requiredAmount} ${creatorToken} to unlock
                 </span>
