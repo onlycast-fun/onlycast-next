@@ -6,7 +6,7 @@ export const isEncryptedTextLink = (link: string) => {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypted-records/text/")
+      url.pathname.startsWith("/records/text/")
     );
   } catch (error) {
     return false;
@@ -18,7 +18,7 @@ export const isEncryptedImageLink = (link: string) => {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypted-records/image/")
+      url.pathname.startsWith("/records/image/")
     );
   } catch (error) {
     return false;
@@ -30,7 +30,7 @@ export const isEncryptedMixedContentLink = (link: string) => {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypted-records/mixed/")
+      url.pathname.startsWith("/records/mixed/")
     );
   } catch (error) {
     return false;
@@ -41,7 +41,7 @@ export const getEncryptedRecordPageLink = (
   arid: string,
   recordType: RecordType
 ) => {
-  return `${ONLYCAST_HOST}/encrypted-records/${recordType}/${arid}`;
+  return `${ONLYCAST_HOST}/records/${recordType}/${arid}`;
 };
 
 export const getAridWithPageLink = (link: string) => {

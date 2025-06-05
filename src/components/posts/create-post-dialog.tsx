@@ -101,11 +101,11 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
     try {
       // 并行上传 text 和 image
       const textPromise = data.encryptedContent
-        ? uploadText(data.encryptedContent)
+        ? uploadText(data.encryptedContent, data.description)
         : Promise.resolve(undefined);
 
       const imagePromise = data.encryptedImage
-        ? uploadImage(data.encryptedImage)
+        ? uploadImage(data.encryptedImage, data.description)
         : Promise.resolve(undefined);
 
       const [textResult, imageResult] = await Promise.all([
@@ -132,11 +132,14 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
       const embeds = [];
 
       if (!!textArId && !!imageArId) {
-        const { pageLink } = await uploadMultiContent({
-          type: UnencryptedJsonType.mc,
-          text_ar_id: textArId,
-          image_ar_id: imageArId,
-        });
+        const { pageLink } = await uploadMultiContent(
+          {
+            type: UnencryptedJsonType.mc,
+            text_ar_id: textArId,
+            image_ar_id: imageArId,
+          },
+          data.description
+        );
         embeds.push({
           url: pageLink,
         });
