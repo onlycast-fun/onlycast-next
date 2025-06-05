@@ -1,34 +1,35 @@
 "use client";
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
-import { getDecryptionTextApiWithPageLink } from "@/lib/encrypted-record";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { UnlockOverlay } from "./unlock-overlay";
+import { getDecryptApiWithArid } from "@/lib/encrypted-record";
+import { RecordType } from "@/types/encrypted-record";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
 interface EncryptedTextProps {
-  visitLink: string;
+  arid: string;
   alt?: string;
   creatorToken?: Token;
   className?: string;
 }
 
 export function EncryptedText({
-  visitLink,
+  arid,
   alt,
   creatorToken,
   className,
 }: EncryptedTextProps) {
-  const [text, setText] = useState<string>(visitLink);
+  const [text, setText] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { authenticated, login, user, linkWallet } = usePrivy();
   const { fcUser } = useUserInfo();
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
   const handleUnlock = async () => {
     if (!authenticated) {
@@ -45,7 +46,7 @@ export function EncryptedText({
 
     try {
       const token = await getAccessToken();
-      const api = getDecryptionTextApiWithPageLink(visitLink);
+      const api = getDecryptApiWithArid(arid);
       const response = await fetch(api, {
         headers: {
           Accept: "application/json",
@@ -71,7 +72,7 @@ export function EncryptedText({
     <UnlockOverlay
       creatorToken={creatorToken?.symbol || ""}
       requiredAmount={10000}
-      contentType="text"
+      contentType={RecordType.text}
       isUnlocked={isUnlocked}
       isLoading={isLoading}
       onUnlockClick={handleUnlock}

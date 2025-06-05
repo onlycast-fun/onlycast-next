@@ -1,6 +1,5 @@
-import { EncryptedMultiContent } from "@/components/posts/encrypted-multi-content";
+import { EncryptedText } from "@/components/posts/encrypted-text";
 import { ONLYCAST_HOST } from "@/constants";
-import { getEncryptedMultiContentPageLink } from "@/lib/encrypted-record";
 
 import type { Metadata } from "next";
 
@@ -10,8 +9,8 @@ export async function generateMetadata({
   params: Promise<{ arid: string }>;
 }): Promise<Metadata> {
   const { arid } = await params;
-  const imageUrl = `${ONLYCAST_HOST}/encrypteds/multi/${arid}/og-image`;
-  const title = "Encrypted Content";
+  const imageUrl = `${ONLYCAST_HOST}/records/og/${arid}`;
+  const title = "Go to onlycast.fun to unlock";
   const description = "Go to onlycast.fun to unlock";
 
   return {
@@ -39,7 +38,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function EncryptedItemPage({
+export default async function EncryptedTextPage({
   params,
 }: {
   params: Promise<{ arid: string }>;
@@ -47,9 +46,7 @@ export default async function EncryptedItemPage({
   const { arid } = await params;
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <EncryptedMultiContent
-        visitLink={getEncryptedMultiContentPageLink(arid)}
-      />
+      <EncryptedText arid={arid} />
     </div>
   );
 }

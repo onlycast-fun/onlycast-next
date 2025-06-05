@@ -9,7 +9,7 @@ import Providers from "@/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Onlycast - Decentralized Creator Platform",
+  title: "OnlyCast - Decentralized Creator Platform",
   description: "Token-based creator content platform",
 };
 

@@ -1,8 +1,9 @@
 import { NeynarCast } from "@/types/neynar";
 import { Buffer } from "buffer";
 import {
+  getAridWithPageLink,
   isEncryptedImageLink,
-  isEncryptedMultiContentLink,
+  isEncryptedMixedContentLink,
   isEncryptedTextLink,
 } from "../encrypted-record";
 
@@ -51,12 +52,15 @@ export type Embeds = {
   }>;
   encryptedTexts: Array<{
     url: string;
+    ar_id: string;
   }>;
   encryptedImgs: Array<{
     url: string;
+    ar_id: string;
   }>;
-  encryptedMultiContents: Array<{
+  encryptedMixedContents: Array<{
     url: string;
+    ar_id: string;
   }>;
 };
 
@@ -67,7 +71,7 @@ export function formatEmbeds(embeds: NeynarCast["embeds"]): Embeds {
   const casts = [];
   const encryptedTexts = [];
   const encryptedImgs = [];
-  const encryptedMultiContents = [];
+  const encryptedMixedContents = [];
 
   for (const embed of embeds) {
     if (embed?.cast_id) {
@@ -95,17 +99,20 @@ export function formatEmbeds(embeds: NeynarCast["embeds"]): Embeds {
         videos.push({
           url: embed.url,
         });
-      } else if (isEncryptedMultiContentLink(embed.url)) {
-        encryptedMultiContents.push({
+      } else if (isEncryptedMixedContentLink(embed.url)) {
+        encryptedMixedContents.push({
           url: embed.url,
+          ar_id: getAridWithPageLink(embed.url),
         });
       } else if (isEncryptedTextLink(embed.url)) {
         encryptedTexts.push({
           url: embed.url,
+          ar_id: getAridWithPageLink(embed.url),
         });
       } else if (isEncryptedImageLink(embed.url)) {
         encryptedImgs.push({
           url: embed.url,
+          ar_id: getAridWithPageLink(embed.url),
         });
       } else {
         webpages.push({
@@ -121,6 +128,6 @@ export function formatEmbeds(embeds: NeynarCast["embeds"]): Embeds {
     videos,
     encryptedTexts,
     encryptedImgs,
-    encryptedMultiContents,
+    encryptedMixedContents,
   };
 }

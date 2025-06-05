@@ -1,11 +1,12 @@
 import { API_URL, ONLYCAST_HOST } from "@/constants";
+import { RecordType } from "@/types/encrypted-record";
 
 export const isEncryptedTextLink = (link: string) => {
   try {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypteds/text/")
+      url.pathname.startsWith("/encrypted-records/text/")
     );
   } catch (error) {
     return false;
@@ -17,33 +18,30 @@ export const isEncryptedImageLink = (link: string) => {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypteds/image/")
+      url.pathname.startsWith("/encrypted-records/image/")
     );
   } catch (error) {
     return false;
   }
 };
 
-export const isEncryptedMultiContentLink = (link: string) => {
+export const isEncryptedMixedContentLink = (link: string) => {
   try {
     const url = new URL(link);
     return (
       url.hostname === "onlycast.fun" &&
-      url.pathname.startsWith("/encrypteds/multi/")
+      url.pathname.startsWith("/encrypted-records/mixed/")
     );
   } catch (error) {
     return false;
   }
 };
 
-export const getEncryptedTextPageLink = (arid: string) => {
-  return `${ONLYCAST_HOST}/encrypteds/text/${arid}`;
-};
-export const getEncryptedImagePageLink = (arid: string) => {
-  return `${ONLYCAST_HOST}/encrypteds/image/${arid}`;
-};
-export const getEncryptedMultiContentPageLink = (arid: string) => {
-  return `${ONLYCAST_HOST}/encrypteds/multi/${arid}`;
+export const getEncryptedRecordPageLink = (
+  arid: string,
+  recordType: RecordType
+) => {
+  return `${ONLYCAST_HOST}/encrypted-records/${recordType}/${arid}`;
 };
 
 export const getAridWithPageLink = (link: string) => {
@@ -52,29 +50,10 @@ export const getAridWithPageLink = (link: string) => {
   return arid || "";
 };
 
-export const getDecryptionTextApiWithArid = (arid: string) => {
-  return `${API_URL}/encrypted-records/text/${arid}`;
+export const getDecryptApiWithArid = (arid: string) => {
+  return `${API_URL}/encrypted-records/decrypt/${arid}`;
 };
 
-export const getDecryptionImageApiWithArid = (arid: string) => {
-  return `${API_URL}/encrypted-records/image/${arid}`;
-};
-
-export const getDecryptionMultiContentApiWithArid = (arid: string) => {
-  return `${API_URL}/encrypted-records/unencrypted_json/${arid}`;
-};
-
-export const getDecryptionTextApiWithPageLink = (link: string) => {
-  const arid = getAridWithPageLink(link);
-  return getDecryptionTextApiWithArid(arid);
-};
-
-export const getDecryptionImageApiWithPageLink = (link: string) => {
-  const arid = getAridWithPageLink(link);
-  return getDecryptionImageApiWithArid(arid);
-};
-
-export const getDecryptionMultiContentApiWithPageLink = (link: string) => {
-  const arid = getAridWithPageLink(link);
-  return getDecryptionMultiContentApiWithArid(arid);
+export const getDecryptionMixedContentApiWithArid = (arid: string) => {
+  return `${API_URL}/encrypted-records/mixed/${arid}`;
 };

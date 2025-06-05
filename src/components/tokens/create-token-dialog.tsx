@@ -32,6 +32,7 @@ import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 import { useUserInfo } from "@/providers/userinfo-provider";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
 export function CreateTokenDialog() {
   const [open, setOpen] = useState(false);
@@ -73,7 +74,7 @@ export function CreateTokenContent({
 }) {
   const { authenticated } = usePrivy();
   const { tokens, setTokens, fcUser } = useUserInfo();
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
   const hasTokens = (tokens?.length ?? 0) > 0;
 
   const [isSubmitting, setIsSubmitting] = useState(false);

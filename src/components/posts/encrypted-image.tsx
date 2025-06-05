@@ -6,29 +6,31 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
-import { getDecryptionImageApiWithPageLink } from "@/lib/encrypted-record";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { UnlockOverlay } from "./unlock-overlay";
+import { RecordType } from "@/types/encrypted-record";
+import { getDecryptApiWithArid } from "@/lib/encrypted-record";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
 interface EncryptedImageProps {
-  visitLink: string;
+  arid: string;
   creatorToken?: Token;
   className?: string;
 }
 
 export function EncryptedImage({
-  visitLink,
+  arid,
   creatorToken,
   className,
 }: EncryptedImageProps) {
-  const [imgUrl, setImgUrl] = useState<string>(visitLink);
+  const [imgUrl, setImgUrl] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { authenticated, login } = usePrivy();
   const { fcUser } = useUserInfo();
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
-  const api = getDecryptionImageApiWithPageLink(visitLink);
+  const api = getDecryptApiWithArid(arid);
   const handleUnlock = async () => {
     if (!authenticated) {
       toast.error("You must be logged in to unlock this image");
@@ -69,7 +71,7 @@ export function EncryptedImage({
     <UnlockOverlay
       creatorToken={creatorToken?.symbol || ""}
       requiredAmount={10000}
-      contentType="image"
+      contentType={RecordType.image}
       isUnlocked={isUnlocked}
       isLoading={isLoading}
       onUnlockClick={handleUnlock}

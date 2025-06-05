@@ -1,10 +1,7 @@
 import { usePrivy } from "@privy-io/react-auth";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
-import {
-  getEncryptedMultiContentPageLink,
-  getEncryptedTextPageLink,
-} from "@/lib/encrypted-record";
+import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 import { RecordType, UnencryptedJson } from "@/types/encrypted-record";
 
 export function useUploadMultipleContent() {
@@ -40,7 +37,7 @@ export function useUploadMultipleContent() {
           method: "POST",
           body: JSON.stringify({
             ar_id: data.itemId,
-            type: RecordType.unencrypted_json,
+            type: RecordType.mixed,
           }),
         });
         const { data: logData } = logRes;
@@ -50,7 +47,7 @@ export function useUploadMultipleContent() {
         const arId = uploadRes.data.itemId;
         return {
           arId,
-          pageLink: getEncryptedMultiContentPageLink(arId),
+          pageLink: getEncryptedRecordPageLink(arId, RecordType.mixed),
         };
       } catch (error) {
         console.error("Text upload failed:", error);

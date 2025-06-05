@@ -13,7 +13,7 @@ import { getFarcasterUserPath } from "@/lib/farcaster/path";
 import { EncryptedText } from "./encrypted-text";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { formatMarketCap } from "@/lib/utils";
-import { EncryptedMultiContent } from "./encrypted-multi-content";
+import { EncryptedMixedContent } from "./encrypted-mixed-content";
 
 interface PostCardProps {
   token?: Token;
@@ -23,7 +23,7 @@ interface PostCardProps {
 export function PostCard({ token, cast }: PostCardProps) {
   const { author, embeds } = cast;
   const formattedEmbeds = formatEmbeds(embeds);
-  const { imgs, encryptedTexts, encryptedImgs, encryptedMultiContents } =
+  const { imgs, encryptedTexts, encryptedImgs, encryptedMixedContents } =
     formattedEmbeds;
   return (
     <Card className="w-full transition-all hover:shadow-md">
@@ -47,9 +47,11 @@ export function PostCard({ token, cast }: PostCardProps) {
               >
                 {author.display_name || author.username}
               </Link>
-              <p className="text-xs text-muted-foreground">
-                {dayjs(cast.timestamp).fromNow()}
-              </p>
+              {!!cast?.timestamp && (
+                <p className="text-xs text-muted-foreground">
+                  {dayjs(cast.timestamp).fromNow()}
+                </p>
+              )}
             </div>
           </div>
           {!!token && (
@@ -80,7 +82,7 @@ export function PostCard({ token, cast }: PostCardProps) {
           encryptedTexts.map((text, idx) => (
             <EncryptedText
               key={idx}
-              visitLink={text.url}
+              arid={text.ar_id}
               creatorToken={token}
               className="mb-4"
             />
@@ -91,18 +93,18 @@ export function PostCard({ token, cast }: PostCardProps) {
           encryptedImgs.map((img, idx) => (
             <EncryptedImage
               key={idx}
-              visitLink={img.url}
+              arid={img.ar_id}
               creatorToken={token}
               className="w-full min-h-48 md:min-h-64 mb-4"
             />
           ))}
 
         {/* Encrypted Multi Content */}
-        {encryptedMultiContents.length > 0 &&
-          encryptedMultiContents.map((multiContent, idx) => (
-            <EncryptedMultiContent
+        {encryptedMixedContents.length > 0 &&
+          encryptedMixedContents.map((mixedContent, idx) => (
+            <EncryptedMixedContent
               key={idx}
-              visitLink={multiContent.url}
+              arid={mixedContent.ar_id}
               creatorToken={token}
               className="w-full min-h-64 md:min-h-80 mb-4"
             />

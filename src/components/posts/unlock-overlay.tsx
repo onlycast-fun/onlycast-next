@@ -1,20 +1,11 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import {
-  Lock,
-  Eye,
-  Sparkles,
-  Star,
-  Coins,
-  ImageIcon,
-  FileText,
-  Play,
-  Music,
-  FileIcon,
-} from "lucide-react";
+import { type ReactNode } from "react";
+import { Lock, Coins, FileText, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { RecordType } from "@/types/encrypted-record";
 
 interface UnlockOverlayProps {
   children: ReactNode;
@@ -22,7 +13,7 @@ interface UnlockOverlayProps {
   requiredAmount?: number;
   className?: string;
   previewIntensity?: "light" | "medium" | "heavy";
-  contentType?: "image" | "text" | "video" | "audio" | "content";
+  contentType?: RecordType;
   isUnlocked: boolean;
   isLoading?: boolean;
   onUnlockClick: () => void;
@@ -34,13 +25,11 @@ export function UnlockOverlay({
   requiredAmount = 1,
   className,
   previewIntensity = "medium",
-  contentType = "image",
+  contentType = RecordType.image,
   isUnlocked = false,
   isLoading = false,
   onUnlockClick,
 }: UnlockOverlayProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   const getBlurIntensity = () => {
     switch (previewIntensity) {
       case "light":
@@ -70,190 +59,131 @@ export function UnlockOverlay({
   const getContentStyles = () => {
     if (isUnlocked) return "";
 
-    return cn(
-      getBlurIntensity(),
-      getPreviewOpacity(),
-      "transition-all duration-500"
-    );
+    if (contentType === "text") {
+      return cn(
+        "select-none",
+        getBlurIntensity(),
+        getPreviewOpacity(),
+        "transition-all duration-500"
+      );
+    } else {
+      return cn(
+        getBlurIntensity(),
+        getPreviewOpacity(),
+        "transition-all duration-500"
+      );
+    }
   };
 
   const getContentTypeInfo = () => {
     switch (contentType) {
-      case "image":
-        return {
-          icon: ImageIcon,
-          label: "Premium Image",
-          badgeText: "Image",
-          requirementText: "Hold {amount} {token} tokens to view this image",
-        };
       case "text":
         return {
           icon: FileText,
-          label: "Premium Text",
           badgeText: "Text",
-          requirementText: "Hold {amount} {token} tokens to read this text",
         };
-      case "video":
+      case "image":
         return {
-          icon: Play,
-          label: "Premium Video",
-          badgeText: "Video",
-          requirementText: "Hold {amount} {token} tokens to watch this video",
+          icon: Layers,
+          badgeText: "Content",
         };
-      case "audio":
+      case "mixed":
         return {
-          icon: Music,
-          label: "Premium Audio",
-          badgeText: "Audio",
-          requirementText:
-            "Hold {amount} {token} tokens to listen to this audio",
-        };
-      case "content":
-        return {
-          icon: FileIcon,
-          label: "Premium Document",
-          badgeText: "Multi Content",
-          requirementText: "Hold {amount} {token} tokens to view this content",
+          icon: Layers,
+          badgeText: "Mixed Content",
         };
       default:
         return {
-          icon: Lock,
-          label: "Premium Content",
+          icon: Layers,
           badgeText: "Content",
-          requirementText: "Hold {amount} {token} tokens to unlock",
         };
     }
   };
 
   const contentInfo = getContentTypeInfo();
-  const ContentIcon = contentInfo.icon;
-
-  // Replace placeholders in requirement text
-  const requirementText = contentInfo.requirementText
-    .replace("{amount}", requiredAmount.toLocaleString())
-    .replace("{token}", creatorToken);
+  const IconComponent = contentInfo.icon;
 
   return (
-    <div
-      className={cn("relative overflow-hidden rounded-lg group", className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={cn("relative overflow-hidden rounded-lg", className)}>
       {/* Content with conditional blur */}
       <div className={getContentStyles()}>{children}</div>
 
-      {/* Unlock Overlay */}
+      {/* Unlock Overlay - Using theme system colors */}
       {!isUnlocked && (
         <div
           className={cn(
-            "absolute inset-0 flex flex-col transition-all duration-300 cursor-pointer min-h-[240px]",
-            "bg-black/40 backdrop-blur-[3px]",
-            isHovered && "bg-black/50 backdrop-blur-[2px]"
+            "absolute inset-0 flex flex-col transition-all duration-300 min-h-[240px]",
+            "bg-muted/90 backdrop-blur-sm"
           )}
-          onClick={onUnlockClick}
         >
           {/* Top Badges Row */}
-          <div className="absolute top-2 left-2 right-2 flex justify-between items-start z-30">
-            {/* Content Type Badge */}
+          <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
+            {/* Content Type Badge with Icon - No shadow */}
             <Badge
               variant="outline"
-              className="bg-black/60 text-white border-white/20 gap-1 shadow-lg text-xs backdrop-blur-sm"
+              className="bg-background/80 text-foreground border-border gap-1.5 text-xs backdrop-blur-sm"
             >
-              <ContentIcon className="w-3 h-3" />
-              {contentInfo.badgeText}
+              <IconComponent className="w-3.5 h-3.5" />
+              <span>{contentInfo.badgeText}</span>
             </Badge>
 
             {/* Premium Badge */}
             <Badge
               variant="secondary"
-              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 gap-1 shadow-lg text-xs"
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white border-0 gap-1 text-xs"
             >
-              <Star className="w-3 h-3 fill-current" />
               Premium
             </Badge>
           </div>
 
-          {/* Main Content Container */}
-          <div className="flex-1 flex flex-col items-center justify-center px-4 py-6 relative z-10 min-h-[200px]">
-            {/* Lock Icon with Animation */}
-            <div
-              className={cn(
-                "relative w-12 h-12 md:w-14 md:h-14 rounded-full mb-4",
-                "bg-gradient-to-br from-primary/90 to-primary/70 backdrop-blur-sm",
-                "flex items-center justify-center shadow-2xl",
-                "transition-all duration-300 group-hover:scale-110",
-                isLoading && "animate-pulse"
-              )}
-            >
+          {/* Lock Icon - Positioned in upper-center area with 50% opacity */}
+          <div className="flex-1 flex items-center justify-center pt-8">
+            <div className="flex items-center justify-center">
               {isLoading ? (
-                <div className="w-5 h-5 md:w-6 md:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-12 h-12 border-4 border-muted-foreground/50 border-t-transparent rounded-full animate-spin" />
               ) : (
-                <>
-                  <Lock className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                  <Sparkles
-                    className={cn(
-                      "absolute -top-1 -right-1 w-3 h-3 text-yellow-300",
-                      "transition-all duration-300",
-                      isHovered && "scale-125 rotate-12"
-                    )}
-                  />
-                </>
-              )}
-            </div>
-
-            {/* Token Requirement Display */}
-            <div className="text-center space-y-3">
-              <div className="flex items-center justify-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
-                <Coins className="w-3 h-3 text-yellow-400" />
-                <span className="text-white text-sm font-semibold">
-                  {requiredAmount.toLocaleString()} ${creatorToken}
-                </span>
-              </div>
-
-              {/* Requirement Text */}
-              <p className="text-white text-xs md:text-sm font-medium drop-shadow-md text-center max-w-xs">
-                {isLoading ? "Verifying tokens..." : requirementText}
-              </p>
-
-              {/* Action Text */}
-              {!isLoading && (
-                <div className="flex items-center justify-center gap-1 text-white text-xs md:text-sm bg-black/40 px-2 py-1 rounded-full">
-                  <Eye className="w-3 h-3" />
-                  <span>Tap to unlock</span>
-                </div>
+                <Lock className="w-12 h-12 text-muted-foreground/50 drop-shadow-sm" />
               )}
             </div>
           </div>
 
-          {/* Hover Effect Indicator */}
-          {!isLoading && isHovered && (
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 transition-all duration-300 z-20">
-              <div className="flex items-center gap-1 text-white text-xs bg-black/70 backdrop-blur-sm px-2 py-1 rounded-full border border-white/20">
-                <div className="w-1 h-1 bg-white/80 rounded-full animate-pulse" />
-                <span className="font-medium">Unlock</span>
-              </div>
+          {/* Button Container - Full width with border */}
+          <div className="flex items-end justify-center pb-3 px-3">
+            <div className="w-full border border-border rounded-lg p-4 bg-background/50 backdrop-blur-sm">
+              <Button
+                onClick={onUnlockClick}
+                disabled={isLoading}
+                className={cn(
+                  "bg-primary hover:bg-primary/90 text-primary-foreground",
+                  "px-8 py-4 text-base font-semibold",
+                  "transition-colors duration-200", // Removed scale and shadow
+                  "w-full", // Full width within container
+                  "rounded-full", // Pill-shaped button
+                  "h-12", // Fixed height for consistent pill shape
+                  isLoading && "opacity-70 cursor-not-allowed"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <Coins className="w-5 h-5" />
+                  <span>
+                    {isLoading
+                      ? "Verifying..."
+                      : `Hold ${requiredAmount.toLocaleString()} $${creatorToken} to unlock`}
+                  </span>
+                </div>
+              </Button>
             </div>
-          )}
-
-          {/* Simplified Decorative Elements */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Corner Decorations */}
-            <div className="absolute top-1 left-1 w-4 h-4 border-t border-l border-white/20 rounded-tl" />
-            <div className="absolute top-1 right-1 w-4 h-4 border-t border-r border-white/20 rounded-tr" />
-            <div className="absolute bottom-1 left-1 w-4 h-4 border-b border-l border-white/20 rounded-bl" />
-            <div className="absolute bottom-1 right-1 w-4 h-4 border-b border-r border-white/20 rounded-br" />
           </div>
         </div>
       )}
 
-      {/* Success State */}
+      {/* Success State - Positioned at bottom center */}
       {isUnlocked && (
-        <div className="absolute top-2 right-2 z-30">
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-10">
           <Badge
             variant="default"
-            className="bg-green-500 text-white gap-1 text-xs"
+            className="bg-green-500 text-white gap-1 text-xs shadow-lg"
           >
-            <Eye className="w-3 h-3" />
             Unlocked
           </Badge>
         </div>

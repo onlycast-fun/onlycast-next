@@ -1,6 +1,5 @@
 import { EncryptedImage } from "@/components/posts/encrypted-image";
 import { ONLYCAST_HOST } from "@/constants";
-import { getEncryptedImagePageLink } from "@/lib/encrypted-record";
 
 import type { Metadata } from "next";
 
@@ -10,8 +9,8 @@ export async function generateMetadata({
   params: Promise<{ arid: string }>;
 }): Promise<Metadata> {
   const { arid } = await params;
-  const imageUrl = `${ONLYCAST_HOST}/encrypteds/image/${arid}/og-image`;
-  const title = "Encrypted Image";
+  const imageUrl = `${ONLYCAST_HOST}/records/og/${arid}`;
+  const title = "Go to onlycast.fun to unlock";
   const description = "Go to onlycast.fun to unlock";
 
   return {
@@ -47,10 +46,7 @@ export default async function EncryptedImagePage({
   const { arid } = await params;
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <EncryptedImage
-        className="w-full min-h-48 md:h-64 mb-4"
-        visitLink={getEncryptedImagePageLink(arid)}
-      />
+      <EncryptedImage className="w-full min-h-48 md:h-64 mb-4" arid={arid} />
     </div>
   );
 }

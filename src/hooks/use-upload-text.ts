@@ -2,8 +2,8 @@ import { usePrivy } from "@privy-io/react-auth";
 import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
-import { getEncryptedTextPageLink } from "@/lib/encrypted-record";
 import { RecordType } from "@/types/encrypted-record";
+import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 
 export function useUploadEncryptedText() {
   const { sdk } = useRequestSDK();
@@ -58,7 +58,7 @@ export function useUploadEncryptedText() {
         const arId = uploadRes.data.itemId;
         return {
           arId,
-          pageLink: getEncryptedTextPageLink(arId),
+          pageLink: getEncryptedRecordPageLink(arId, RecordType.text),
         };
       } catch (error) {
         console.error("Text upload failed:", error);

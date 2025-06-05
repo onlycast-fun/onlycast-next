@@ -98,13 +98,6 @@ export function EncryptedImageUpload({
               />
             </div>
             <p
-              className={`text-sm font-medium mb-1 ${
-                disabled ? "text-muted-foreground/50" : "text-foreground"
-              }`}
-            >
-              Add an encrypted image
-            </p>
-            <p
               className={`text-xs mb-4 ${
                 disabled ? "text-muted-foreground/50" : "text-muted-foreground"
               }`}

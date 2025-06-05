@@ -1,39 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
 import { Token } from "@/types";
 import {
-  getDecryptionImageApiWithArid,
-  getDecryptionMultiContentApiWithPageLink,
-  getDecryptionTextApiWithArid,
+  getDecryptApiWithArid,
+  getDecryptionMixedContentApiWithArid,
 } from "@/lib/encrypted-record";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { UnlockOverlay } from "./unlock-overlay";
+import { RecordType } from "@/types/encrypted-record";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
-interface EncryptedMultiContentProps {
-  visitLink: string;
+interface EncryptedMixedContentProps {
+  arid: string;
   alt?: string;
   creatorToken?: Token;
   className?: string;
 }
 
-export function EncryptedMultiContent({
-  visitLink,
+export function EncryptedMixedContent({
+  arid,
   alt,
   creatorToken,
   className,
-}: EncryptedMultiContentProps) {
+}: EncryptedMixedContentProps) {
   const [text, setText] = useState<string>("");
   const [imgUrl, setImgUrl] = useState<string>("");
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { authenticated, login } = usePrivy();
   const { fcUser } = useUserInfo();
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
   const handleUnlock = async () => {
     if (!authenticated) {
@@ -50,7 +50,7 @@ export function EncryptedMultiContent({
 
     try {
       const token = await getAccessToken();
-      const api = getDecryptionMultiContentApiWithPageLink(visitLink);
+      const api = getDecryptionMixedContentApiWithArid(arid);
       console.log("API:", api);
       const response = await fetch(api, {
         headers: {
@@ -68,7 +68,7 @@ export function EncryptedMultiContent({
       const { text_ar_id, image_ar_id } = jsonContent || {};
 
       const textPromise = text_ar_id
-        ? fetch(getDecryptionTextApiWithArid(text_ar_id), {
+        ? fetch(getDecryptApiWithArid(text_ar_id), {
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
@@ -80,7 +80,7 @@ export function EncryptedMultiContent({
         : Promise.resolve(null);
 
       const imagePromise = image_ar_id
-        ? fetch(getDecryptionImageApiWithArid(image_ar_id), {
+        ? fetch(getDecryptApiWithArid(image_ar_id), {
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
@@ -117,7 +117,7 @@ export function EncryptedMultiContent({
     <UnlockOverlay
       creatorToken={creatorToken?.symbol || ""}
       requiredAmount={10000}
-      contentType="content"
+      contentType={RecordType.mixed}
       isUnlocked={isUnlocked}
       isLoading={isLoading}
       onUnlockClick={handleUnlock}

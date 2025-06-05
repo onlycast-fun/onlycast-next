@@ -84,7 +84,7 @@ export function SocialLinks() {
               title={link.description}
             >
               <IconComponent className="w-4 h-4" />
-              <span className="hidden lg:inline">{link.name}</span>
+              {/* <span className="hidden lg:inline">{link.name}</span> */}
               <ExternalLink className="w-3 h-3 opacity-50" />
             </Button>
           );

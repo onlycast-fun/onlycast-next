@@ -111,7 +111,17 @@ export function AirdropInfo() {
       : totalCreators <= 5000
       ? ((totalCreators - 1000) / 4000) * 100
       : 100;
-
+  return (
+    <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20">
+      <CardHeader className="text-center pb-4">
+        <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 h-[200px] md:h-[300px]">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl font-bold">
+            Comming Soon
+          </CardTitle>
+        </div>
+      </CardHeader>
+    </Card>
+  );
   return (
     <div className="space-y-6">
       {/* Main Airdrop Banner */}
@@ -269,7 +279,7 @@ export function AirdropInfo() {
               <ul className="space-y-2 text-xs md:text-sm text-muted-foreground">
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
-                  <span>Create at least one token on Onlycast platform</span>
+                  <span>Create at least one token on OnlyCast platform</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>

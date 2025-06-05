@@ -3,9 +3,15 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Upload } from "lucide-react";
 import { toast } from "sonner";
-
+import {
+  Plus,
+  Lock,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  ImageIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -32,7 +38,6 @@ import {
 import { openFarcasterCreateCast } from "@/lib/farcaster";
 import { CreatePostAlert } from "./create-post-alert";
 import { EncryptedImageUpload } from "./encrypted-image-upload";
-import Link from "next/link";
 import { useUploadEncryptedText } from "@/hooks/use-upload-text";
 import { useUploadMultipleContent } from "@/hooks/use-upload-multiple-content";
 import { UnencryptedJsonType } from "@/types/encrypted-record";
@@ -50,7 +55,7 @@ export function CreatePostDialog() {
           Create Cast
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
         <CreatePostContent setOpen={setOpen} />
       </DialogContent>
     </Dialog>
@@ -63,24 +68,33 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
   const hasTokens = (tokens?.length ?? 0) > 0;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isTextExpanded, setIsTextExpanded] = useState(false);
+  const [isImageExpanded, setIsImageExpanded] = useState(false);
 
   const form = useForm<CreatePostData>({
     resolver: zodResolver(createPostSchema),
     defaultValues: {
-      description: "",
+      description: "Premium content for token holders",
       encryptedContent: "",
       encryptedImage: undefined,
     },
   });
+
+  // Watch form values to check if at least one encrypted content is provided
+  const encryptedContent = form.watch("encryptedContent");
+  const encryptedImage = form.watch("encryptedImage");
+  const hasEncryptedContent =
+    (isTextExpanded && encryptedContent) || (isImageExpanded && encryptedImage);
+
   const { upload: uploadText, uploading: uploadingText } =
     useUploadEncryptedText();
   const { upload: uploadImage, uploading: uploadingImage } =
     useUploadEncryptedImage();
   const { upload: uploadMultiContent, uploading: uploadingMultiContent } =
     useUploadMultipleContent();
-  const { submitCast, writing } = useFarcasterWrite();
+  // const { submitCast, writing } = useFarcasterWrite();
 
-  const disabled = !authenticated || !hasTokens || writing || isSubmitting;
+  const disabled = !authenticated || !hasTokens || isSubmitting;
   const onSubmit = async (data: CreatePostData) => {
     setIsSubmitting(true);
 
@@ -175,86 +189,194 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
       setIsSubmitting(false);
     }
   };
+
+  const handleTextToggle = () => {
+    if (disabled) return;
+    setIsTextExpanded(!isTextExpanded);
+    if (!isTextExpanded) {
+      // Clear the field when collapsing
+      form.setValue("encryptedContent", "");
+    }
+  };
+
+  const handleImageToggle = () => {
+    if (disabled) return;
+    setIsImageExpanded(!isImageExpanded);
+    if (!isImageExpanded) {
+      // Clear the field when collapsing
+      form.setValue("encryptedImage", undefined);
+    }
+  };
   return (
     <>
-      {" "}
-      <DialogHeader>
+      <DialogHeader className="bg-background pb-4">
         <DialogTitle>Create New Cast</DialogTitle>
       </DialogHeader>
-      <CreatePostAlert />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Description</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Say something to remind us not to miss it..."
-                    className="min-h-[120px] resize-none"
-                    disabled={disabled}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
-          <FormField
-            control={form.control}
-            name="encryptedContent"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Encrypted Content (Optional)</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder={`Record your exclusive news... \r\nOnly users who hold your token can view this content`}
-                    className="min-h-[200px] resize-none border-primary"
-                    disabled={disabled}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="space-y-6 px-1">
+        <CreatePostAlert />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            {/* Premium Content Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                <h3 className="text-base font-semibold">Premium Content</h3>
+                <span className="text-sm text-muted-foreground">
+                  (Token holders only)
+                </span>
+              </div>
 
-          <FormField
-            control={form.control}
-            name="encryptedImage"
-            render={({ field: { onChange, value, ...field } }) => (
-              <FormItem>
-                <FormLabel>Encrypted Image (Optional)</FormLabel>
-                <FormControl>
-                  <EncryptedImageUpload
-                    value={value}
-                    onChange={onChange}
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <div className="border border-dashed border-primary/25 rounded-lg p-4 space-y-4 bg-primary/5">
+                <p className="text-sm text-muted-foreground text-center">
+                  Add at least one type of premium content
+                </p>
 
-          <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={disabled}>
-              {isSubmitting ? "Creating..." : "Create Cast"}
-            </Button>
-          </div>
-        </form>
-      </Form>
+                {/* Premium Text */}
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleTextToggle}
+                    disabled={disabled}
+                    className="w-full justify-between p-3 h-auto border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4" />
+                      <span className="font-medium">Text Content</span>
+                      <span className="text-xs text-muted-foreground">
+                        (Optional)
+                      </span>
+                    </div>
+                    {isTextExpanded ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  {isTextExpanded && (
+                    <FormField
+                      control={form.control}
+                      name="encryptedContent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder={
+                                disabled
+                                  ? "Connect wallet and create a token to add premium text..."
+                                  : "Write your premium text content here..."
+                              }
+                              className="min-h-[120px] max-h-[200px] resize-none"
+                              disabled={disabled}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+
+                {/* Premium Image */}
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handleImageToggle}
+                    disabled={disabled}
+                    className="w-full justify-between p-3 h-auto border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      <span className="font-medium">Image Content</span>
+                      <span className="text-xs text-muted-foreground">
+                        (Optional)
+                      </span>
+                    </div>
+                    {isImageExpanded ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
+                  </Button>
+
+                  {isImageExpanded && (
+                    <FormField
+                      control={form.control}
+                      name="encryptedImage"
+                      render={({ field: { value, onChange } }) => (
+                        <FormItem>
+                          <FormControl>
+                            <EncryptedImageUpload
+                              value={value}
+                              onChange={onChange}
+                              disabled={disabled}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+
+                {/* Validation Message */}
+                {!hasEncryptedContent && !disabled && (
+                  <p className="text-xs text-destructive text-center">
+                    Please add at least one type of premium content
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm text-muted-foreground">
+                    Description <span className="text-xs">(Optional)</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      className="min-h-[80px] max-h-[120px] resize-none text-sm"
+                      disabled={disabled}
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    {`Briefly describe your premium content...`}
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 sticky bottom-0 bg-background">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={disabled || !hasEncryptedContent}
+                className="w-full sm:w-auto"
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </>
   );
 }

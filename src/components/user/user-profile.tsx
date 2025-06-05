@@ -20,11 +20,13 @@ import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { getFarcasterVerifiedAddressPath } from "@/lib/farcaster/path";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
 export function UserProfile() {
   const { ready, authenticated, logout, user: privyUser, login } = usePrivy();
   const { tokens, fcUser } = useUserInfo();
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0] || "";
+  console.log("UserProfile:", fcUser);
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
   // const { linkedExternalWallet, linkWallet, unlinkWallet } = useUserWallet();
   const { farcasterAccount } = useFarcasterAccount();
@@ -111,7 +113,7 @@ export function UserProfile() {
                   target="_blank"
                   className="text-xs text-primary hover:underline"
                 >
-                  Add address to Farcaster
+                  Set farcaster primary wallet
                 </Link>
               </div>
             )}

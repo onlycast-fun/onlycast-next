@@ -1,12 +1,13 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { usePrivy } from "@privy-io/react-auth";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Info, Wallet } from "lucide-react";
 import { Button } from "../ui/button";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { Token } from "@/types";
 import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { getFarcasterVerifiedAddressPath } from "@/lib/farcaster/path";
+import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 
 export function CheckFcWalletAlert() {
   return (
@@ -59,11 +60,41 @@ export function CheckUserTokensAlert({ token }: { token: Token }) {
   );
 }
 
+export function UsedWalletAlert({ address }: { address: string }) {
+  return (
+    <Alert className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
+      <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+      <AlertDescription className="text-blue-800 dark:text-blue-200">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            <span className="font-medium">Farcaster Primary Wallet:</span>
+          </div>
+          <div className="font-mono text-sm bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded border">
+            {address}
+          </div>
+          <p className="text-sm">
+            We will use this wallet to create your token. Please confirm you
+            want to use this wallet before proceeding.
+          </p>
+          <Link
+            href={getFarcasterVerifiedAddressPath()}
+            target="_blank"
+            className="font-medium underline hover:no-underline"
+          >
+            Go to farcaster to confirm →
+          </Link>
+        </div>
+      </AlertDescription>
+    </Alert>
+  );
+}
+
 export function CreateTokenAlert() {
   const { tokens, fcUser } = useUserInfo();
   const { authenticated, login } = usePrivy();
   const token = tokens?.[0];
-  const fcWalletAddress = fcUser?.verified_addresses?.eth_addresses?.[0];
+  const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
   if (!authenticated) {
     return <CheckUserLoginAlert login={login} />;
@@ -76,5 +107,5 @@ export function CreateTokenAlert() {
   if (token) {
     return <CheckUserTokensAlert token={token} />;
   }
-  return null;
+  return <UsedWalletAlert address={fcWalletAddress} />;
 }

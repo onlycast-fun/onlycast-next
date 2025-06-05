@@ -1,7 +1,7 @@
 export enum RecordType {
   text = "text",
   image = "image",
-  unencrypted_json = "unencrypted_json",
+  mixed = "mixed",
 }
 export enum UnencryptedJsonType {
   emc = "encrypted-multiple-content",
@@ -10,4 +10,12 @@ export type UnencryptedJson = {
   type: UnencryptedJsonType;
   text_ar_id?: string;
   image_ar_id?: string;
+};
+
+export type EncryptedRecord = {
+  type: RecordType;
+  ar_id: string;
+  user_id: string;
+  created_at: Date;
+  updated_at: Date;
 };

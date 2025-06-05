@@ -1,11 +1,9 @@
-import { useQuery } from "@tanstack/react-query";
 import { usePrivy } from "@privy-io/react-auth";
 import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
-import { API_URL } from "@/constants";
 import { useCallback, useState } from "react";
-import { getEncryptedImagePageLink } from "@/lib/encrypted-record";
 import { RecordType } from "@/types/encrypted-record";
+import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 
 export function useUploadEncryptedImage() {
   const { sdk } = useRequestSDK();
@@ -63,7 +61,7 @@ export function useUploadEncryptedImage() {
         const arId = uploadRes.data.itemId;
         return {
           arId,
-          pageLink: getEncryptedImagePageLink(arId),
+          pageLink: getEncryptedRecordPageLink(arId, RecordType.image),
         };
       } catch (error) {
         console.error("Image upload failed:", error);

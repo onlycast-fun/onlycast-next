@@ -11,7 +11,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", label: "Posts", icon: Home },
+    { href: "/", label: "Casts", icon: Home },
     { href: "/tokens", label: "Tokens", icon: Coins },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   ];
@@ -24,7 +24,7 @@ export function Navbar() {
           {/* Left side - Logo and Navigation */}
           <div className="flex items-center space-x-8">
             <Link href="/" className="text-2xl font-bold text-primary">
-              Onlycast
+              OnlyCast
             </Link>
 
             <div className="flex items-center space-x-6">
@@ -82,7 +82,7 @@ export function Navbar() {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-full">
           <Link href="/" className="text-xl font-bold text-primary">
-            Onlycast
+            OnlyCast
           </Link>
 
           <div className="flex items-center space-x-2">
