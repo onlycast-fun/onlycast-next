@@ -25,7 +25,6 @@ import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
 export function UserProfile() {
   const { ready, authenticated, logout, user: privyUser, login } = usePrivy();
   const { tokens, fcUser } = useUserInfo();
-  console.log("UserProfile:", fcUser);
   const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
 
   // const { linkedExternalWallet, linkWallet, unlinkWallet } = useUserWallet();

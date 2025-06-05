@@ -20,7 +20,7 @@ export async function GET(
   const token = tokens?.[0];
   return getOgResponse({
     contentType: record.type,
-    creatorToken: token.token_address,
+    creatorToken: token.symbol,
     requiredAmount: 10000,
     creatorName: user?.display_name || "",
   });
