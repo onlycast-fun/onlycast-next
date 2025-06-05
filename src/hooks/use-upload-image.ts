@@ -1,4 +1,3 @@
-import { usePrivy } from "@privy-io/react-auth";
 import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
@@ -7,8 +6,6 @@ import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 
 export function useUploadEncryptedImage() {
   const { sdk } = useRequestSDK();
-  const { user } = usePrivy();
-  const userId = user?.id;
 
   const [uploading, setUploading] = useState(false);
 
@@ -18,11 +15,17 @@ export function useUploadEncryptedImage() {
       try {
         setUploading(true);
 
+        const res = await sdk.getEncryptKeys();
+        if (!res.data) {
+          throw new Error("Failed to get encryption keys");
+        }
+        const { aesKey, iv, salt } = await FrontendCrypto.formatkeys(res.data);
+
         // 1. 执行增强加密
-        const { encrypted, salt, iv } = await FrontendCrypto.encryptFile(
-          file,
-          userId
-        );
+        const { encrypted } = await FrontendCrypto.encryptFile(file, {
+          aesKey,
+          iv,
+        });
 
         // 2. 构造FormData
         const formData = new FormData();
@@ -71,7 +74,7 @@ export function useUploadEncryptedImage() {
         setUploading(false);
       }
     },
-    [sdk, userId]
+    [sdk]
   );
 
   return { upload, uploading };

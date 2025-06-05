@@ -190,4 +190,12 @@ export class RequestSdk {
   async getLeaderboards() {
     return await this.request<{ data: LeaderboardItemData[] }>("/leaderboards");
   }
+
+  async getEncryptKeys() {
+    return await this.request<{
+      aesKey: string;
+      iv: string;
+      salt: string;
+    }>(`/encrypted-records/gen-keys`);
+  }
 }

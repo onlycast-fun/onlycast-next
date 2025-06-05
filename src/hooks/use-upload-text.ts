@@ -1,4 +1,3 @@
-import { usePrivy } from "@privy-io/react-auth";
 import { FrontendCrypto } from "@/lib/crypto";
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useCallback, useState } from "react";
@@ -7,8 +6,6 @@ import { getEncryptedRecordPageLink } from "@/lib/encrypted-record";
 
 export function useUploadEncryptedText() {
   const { sdk } = useRequestSDK();
-  const { user } = usePrivy();
-  const userId = user?.id;
 
   const [uploading, setUploading] = useState(false);
 
@@ -17,12 +14,21 @@ export function useUploadEncryptedText() {
       if (!text) throw new Error("No text provided");
       try {
         setUploading(true);
+        const res = await sdk.getEncryptKeys();
+        if (!res.data) {
+          throw new Error("Failed to get encryption keys");
+        }
+        const { aesKey, iv, salt } = await FrontendCrypto.formatkeys(res.data);
+        console.log("Encryption keys:", res.data);
+        if (!aesKey || !iv || !salt) {
+          throw new Error("Encryption keys are missing");
+        }
 
         // 1. 执行增强加密
-        const { encrypted, salt, iv } = await FrontendCrypto.encryptText(
-          text,
-          userId
-        );
+        const { encrypted } = await FrontendCrypto.encryptText(text, {
+          aesKey: aesKey,
+          iv: iv,
+        });
 
         // 3. 上传到Arweave
         const uploadRes = await sdk.request<{
@@ -68,7 +74,7 @@ export function useUploadEncryptedText() {
         setUploading(false);
       }
     },
-    [sdk, userId]
+    [sdk]
   );
 
   return { upload, uploading };
