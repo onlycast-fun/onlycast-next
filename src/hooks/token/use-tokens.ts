@@ -1,15 +1,22 @@
 import { useRequestSDK } from "@/providers/request-sdk-provider";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export function useTokens(limit: number) {
+export function useTokens({
+  limit = 15,
+  orderBy = "marketCap",
+}: {
+  limit?: number;
+  orderBy?: "marketCap" | "new";
+}) {
   const { sdk } = useRequestSDK();
 
   return useInfiniteQuery({
-    queryKey: ["tokens", limit], // 包含limit的查询键
+    queryKey: ["tokens", limit, orderBy],
     queryFn: async ({ pageParam }) => {
       const res = await sdk.getTokens({
         page: pageParam,
         limit: limit,
+        orderBy: orderBy,
       });
       const data = res.data?.data || [];
       const nextPage = data.length === limit ? (pageParam || 1) + 1 : undefined;

@@ -16,7 +16,7 @@ import { useTokens } from "@/hooks/token/use-tokens";
 import { TokensSkeleton } from "@/components/tokens/token-skeleton";
 
 export default function TokensPage() {
-  const [sortBy, setSortBy] = useState("marketcap");
+  const [sortBy, setSortBy] = useState<"marketCap" | "new">("marketCap");
   const {
     data,
     error,
@@ -25,20 +25,28 @@ export default function TokensPage() {
     isFetching,
     isFetchingNextPage,
     status,
-  } = useTokens(15);
+  } = useTokens({
+    limit: 15,
+    orderBy: sortBy,
+  });
   const tokens = data?.pages.flatMap((page) => page.data) || [];
 
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Top Control Area */}
       <div className="flex items-center justify-between mb-6">
-        <Select value={sortBy} onValueChange={setSortBy}>
+        <Select
+          value={sortBy}
+          onValueChange={(v) => {
+            setSortBy(v as "marketCap" | "new");
+          }}
+        >
           <SelectTrigger className="w-36">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="marketcap">Market Cap</SelectItem>
-            {/* <SelectItem value="new">New</SelectItem> */}
+            <SelectItem value="marketCap">Market Cap</SelectItem>
+            <SelectItem value="new">New</SelectItem>
           </SelectContent>
         </Select>
 

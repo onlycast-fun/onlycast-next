@@ -137,11 +137,16 @@ export class RequestSdk {
     return await this.request<{ data: Token[] }>("/users/tokens");
   }
 
-  async getTokens(pageParam: { page?: number; limit?: number }) {
+  async getTokens(pageParam: {
+    page?: number;
+    limit?: number;
+    orderBy?: string;
+  }) {
     const params = new URLSearchParams();
     if (pageParam.page) params.append("page", String(pageParam.page));
     if (pageParam.limit !== undefined)
       params.append("limit", String(pageParam.limit));
+    if (pageParam.orderBy) params.append("orderBy", pageParam.orderBy);
     return await this.request<{ data: Token[] }>(
       "/tokens?" + params.toString()
     );
