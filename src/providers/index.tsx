@@ -33,11 +33,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           appId={PRIVY_APP_ID}
           //   clientId="your-app-client-id"
           config={{
-            loginMethods: ["farcaster", "wallet"],
+            loginMethods: ["farcaster"],
             embeddedWallets: {
               createOnLogin: "all-users",
             },
-            appearance: { walletChainType: "ethereum-only" },
           }}
         >
           <RequestSDKProvider>

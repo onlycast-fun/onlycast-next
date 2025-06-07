@@ -8,6 +8,7 @@ import Link from "next/link";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { getFarcasterVerifiedAddressPath } from "@/lib/farcaster/path";
 import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
+import { shortPubKey } from "@/lib/utils";
 
 export function CheckFcWalletAlert() {
   return (
@@ -71,7 +72,8 @@ export function UsedWalletAlert({ address }: { address: string }) {
             <span className="font-medium">Farcaster Primary Wallet:</span>
           </div>
           <div className="font-mono text-sm bg-blue-100 dark:bg-blue-900/50 px-2 py-1 rounded border">
-            {address}
+            <span className="max-sm:hidden">{address}</span>
+            <span className="sm:hidden">{shortPubKey(address)}</span>
           </div>
           <p className="text-sm">
             We will use this wallet to create your token. Please confirm you

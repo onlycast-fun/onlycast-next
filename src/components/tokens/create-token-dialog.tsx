@@ -33,6 +33,9 @@ import { getClankerTokenPath } from "@/lib/clanker/path";
 import { useUserWallet } from "@/hooks/wallet/useUserWallet";
 import { useUserInfo } from "@/providers/userinfo-provider";
 import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
+import { ImageUpload } from "./image-upload";
+import { cn } from "@/lib/utils";
+import { useRequestSDK } from "@/providers/request-sdk-provider";
 
 export function CreateTokenDialog() {
   const [open, setOpen] = useState(false);
@@ -72,6 +75,7 @@ export function CreateTokenContent({
 }: {
   setOpen: (open: boolean) => void;
 }) {
+  const { sdk } = useRequestSDK();
   const { authenticated } = usePrivy();
   const { tokens, setTokens, fcUser } = useUserInfo();
   const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
@@ -84,11 +88,14 @@ export function CreateTokenContent({
     defaultValues: {
       name: "",
       symbol: "",
-      image: "",
       percentage: 0,
       durationInDays: 0,
     },
   });
+
+  // Watch percentage to control duration field
+  const percentage = form.watch("percentage");
+  const isDurationEnabled = percentage > 0;
 
   const { create, creating } = useCreateToken(fcWalletAddress);
 
@@ -98,7 +105,26 @@ export function CreateTokenContent({
   const onSubmit = async (data: CreateTokenData) => {
     try {
       setIsSubmitting(true);
-      const token = await create(data);
+
+      // 3. 上传到Arweave
+      const formData = new FormData();
+      formData.append("file", data.image);
+      const uploadRes = await sdk.request<{
+        everHash?: string;
+        itemId: string;
+        arUrl: string;
+        arseedUrl: string;
+      }>(`/ar-upload/image`, {
+        method: "POST",
+        body: formData,
+        isFormData: true,
+      });
+      const { data: uploadData } = uploadRes;
+      if (!uploadData?.arseedUrl) {
+        throw new Error("Failed to upload image");
+      }
+
+      const token = await create({ ...data, image: uploadData.arseedUrl });
       setTokens((prev) => {
         if (!prev) {
           return [token];
@@ -134,133 +160,275 @@ export function CreateTokenContent({
     }
   };
 
+  const handlePercentageQuickSet = (value: number) => {
+    form.setValue("percentage", value);
+    // If setting percentage > 0 and duration is 0, set minimum duration
+    if (value > 0 && form.getValues("durationInDays") === 0) {
+      form.setValue("durationInDays", 31);
+    }
+    // If setting percentage to 0, reset duration
+    if (value === 0) {
+      form.setValue("durationInDays", 0);
+    }
+  };
+
+  const handleDurationQuickSet = (value: number) => {
+    if (isDurationEnabled) {
+      form.setValue("durationInDays", value);
+    }
+  };
   return (
     <>
       {" "}
       <DialogHeader>
         <DialogTitle>Create New Token</DialogTitle>
       </DialogHeader>
-      <CreateTokenAlert />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Token Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g. My Token"
-                    disabled={disabled}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="space-y-6 px-1 max-h-[85vh]  overflow-y-auto">
+        <CreateTokenAlert />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Token Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. My Token"
+                      disabled={disabled}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="symbol"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Token Symbol</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g. MTK"
-                    disabled={disabled}
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(e.target.value.toUpperCase())
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="symbol"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Token Symbol</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="e.g. MTK"
+                      disabled={disabled}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(e.target.value.toUpperCase())
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="image"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Image URL</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="https://example.com/image.png"
-                    type="url"
-                    disabled={disabled}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="image"
+              render={({ field: { value, onChange } }) => (
+                <FormItem>
+                  <FormLabel>Token Image</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={value}
+                      onChange={onChange}
+                      disabled={disabled}
+                      maxSize={1}
+                      accept="image/*"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="percentage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Percentage: {field.value}%</FormLabel>
-                <FormControl>
-                  <Slider
-                    min={0}
-                    max={100}
-                    step={1}
-                    value={[field.value || 0]}
-                    onValueChange={(value) => field.onChange(value[0])}
-                    className="w-full"
-                    disabled={disabled}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="percentage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Percentage (%)</FormLabel>
+                  <FormControl>
+                    <div className="space-y-3">
+                      <Input
+                        type="number"
+                        min={0}
+                        max={100}
+                        placeholder="0"
+                        disabled={disabled}
+                        {...field}
+                        onChange={(e) => {
+                          const value = Number.parseInt(e.target.value) || 0;
+                          field.onChange(value);
+                          // Auto-set duration when percentage is set
+                          if (
+                            value > 0 &&
+                            form.getValues("durationInDays") === 0
+                          ) {
+                            form.setValue("durationInDays", 31);
+                          }
+                          if (value === 0) {
+                            form.setValue("durationInDays", 0);
+                          }
+                        }}
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={disabled}
+                          onClick={() => handlePercentageQuickSet(5)}
+                          className={cn(
+                            percentage === 5 &&
+                              "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          5%
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={disabled}
+                          onClick={() => handlePercentageQuickSet(15)}
+                          className={cn(
+                            percentage === 15 &&
+                              "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          15%
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={disabled}
+                          onClick={() => handlePercentageQuickSet(30)}
+                          className={cn(
+                            percentage === 30 &&
+                              "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          30%
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={disabled}
+                          onClick={() => handlePercentageQuickSet(0)}
+                          className={cn(
+                            percentage === 0 &&
+                              "bg-primary text-primary-foreground"
+                          )}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="durationInDays"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Duration in Days</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    min={0}
-                    placeholder="0"
-                    disabled={disabled}
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(Number.parseInt(e.target.value) || 0)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="durationInDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel
+                    className={cn(
+                      !isDurationEnabled && "text-muted-foreground"
+                    )}
+                  >
+                    Duration in Days
+                    {!isDurationEnabled && " (Set percentage first)"}
+                  </FormLabel>
+                  <FormControl>
+                    <div className="space-y-3">
+                      <Input
+                        type="number"
+                        min={isDurationEnabled ? 31 : 0}
+                        max={365}
+                        placeholder={isDurationEnabled ? "31" : "0"}
+                        disabled={disabled || !isDurationEnabled}
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(Number.parseInt(e.target.value) || 0)
+                        }
+                      />
+                      {isDurationEnabled && (
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={disabled || !isDurationEnabled}
+                            onClick={() => handleDurationQuickSet(31)}
+                            className={cn(
+                              field.value === 31 &&
+                                "bg-primary text-primary-foreground"
+                            )}
+                          >
+                            31 days
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={disabled || !isDurationEnabled}
+                            onClick={() => handleDurationQuickSet(90)}
+                            className={cn(
+                              field.value === 90 &&
+                                "bg-primary text-primary-foreground"
+                            )}
+                          >
+                            90 days
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={disabled || !isDurationEnabled}
+                            onClick={() => handleDurationQuickSet(180)}
+                            className={cn(
+                              field.value === 180 &&
+                                "bg-primary text-primary-foreground"
+                            )}
+                          >
+                            180 days
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <div className="flex justify-end space-x-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={disabled}>
-              {isSubmitting ? "Creating..." : "Create Token"}
-            </Button>
-          </div>
-        </form>
-      </Form>
+            <div className="flex justify-end space-x-3 pt-4 sticky bottom-0 bg-background">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={disabled}>
+                {isSubmitting ? "Creating..." : "Create Token"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
     </>
   );
 }
