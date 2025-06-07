@@ -85,7 +85,7 @@ export function UnlockOverlay({
       case "image":
         return {
           icon: Layers,
-          badgeText: "Content",
+          badgeText: "Image",
         };
       case "mixed":
         return {
@@ -104,7 +104,12 @@ export function UnlockOverlay({
   const IconComponent = contentInfo.icon;
 
   return (
-    <div className={cn("relative overflow-hidden rounded-lg", className)}>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-lg w-full min-h-64",
+        className
+      )}
+    >
       {/* Content with conditional blur */}
       <div className={getContentStyles()}>{children}</div>
 
@@ -179,7 +184,7 @@ export function UnlockOverlay({
 
       {/* Success State - Positioned at bottom center */}
       {isUnlocked && (
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="w-full flex items-center justify-center mt-4">
           <Badge
             variant="default"
             className="bg-green-500 text-white gap-1 text-xs shadow-lg"

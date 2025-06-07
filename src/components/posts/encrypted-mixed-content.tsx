@@ -13,6 +13,8 @@ import { useUserInfo } from "@/providers/userinfo-provider";
 import { UnlockOverlay } from "./unlock-overlay";
 import { RecordType } from "@/types/encrypted-record";
 import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
+import { UnlockText } from "./encrypted-text";
+import { UnlockedImage } from "./encrypted-image";
 
 interface EncryptedMixedContentProps {
   arid: string;
@@ -121,27 +123,10 @@ export function EncryptedMixedContent({
       isLoading={isLoading}
       onUnlockClick={handleUnlock}
     >
-      <div
-        className={cn(
-          "relative overflow-hidden rounded-lg bg-accent min-h-[500px] p-4 flex flex-col gap-4 items-center justify-center",
-          className
-        )}
-      >
-        {!!text && (
-          <span className="text-accent-foreground text-sm md:text-base font-mono whitespace-pre-wrap break-words transition-all duration-300">
-            {text}
-          </span>
-        )}
+      <div className={cn("w-full min-h-48 md:min-h-64 flex flex-col gap-4")}>
+        {!!text && <UnlockText text={text} />}
 
-        {!!imgUrl && (
-          <img
-            src={imgUrl}
-            className={cn(
-              "w-full h-full object-cover transition-all duration-300",
-              !isUnlocked && "blur-[10px]"
-            )}
-          />
-        )}
+        {!!imgUrl && <UnlockedImage src={imgUrl} />}
       </div>
     </UnlockOverlay>
   );

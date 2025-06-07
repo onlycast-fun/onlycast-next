@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Expand, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { getAccessToken, usePrivy } from "@privy-io/react-auth";
@@ -11,6 +11,8 @@ import { UnlockOverlay } from "./unlock-overlay";
 import { RecordType } from "@/types/encrypted-record";
 import { getDecryptApiWithArid } from "@/lib/encrypted-record";
 import { getUserPrimaryEthAddress } from "@/lib/farcaster/user";
+import { ImageLightbox } from "./image-lightbox";
+import { Button } from "../ui/button";
 
 interface EncryptedImageProps {
   arid: string;
@@ -76,15 +78,50 @@ export function EncryptedImage({
       isLoading={isLoading}
       onUnlockClick={handleUnlock}
     >
-      <div className={cn("relative overflow-hidden rounded-lg", className)}>
-        <img
-          src={imgUrl}
-          className={cn(
-            "w-full h-full object-cover transition-all duration-300",
-            !isUnlocked && "blur-[10px]"
-          )}
-        />
+      <div className={"w-full min-h-48 md:min-h-64 "}>
+        {isUnlocked && <UnlockedImage src={imgUrl} />}
       </div>
     </UnlockOverlay>
+  );
+}
+
+export function UnlockedImage({
+  src,
+  className,
+}: {
+  src: string;
+  className?: string;
+}) {
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  return (
+    <div className={cn("relative overflow-hidden rounded-lg", className)}>
+      {src && (
+        <img
+          src={src}
+          className={cn(
+            "w-full h-full object-cover transition-all duration-300"
+          )}
+        />
+      )}
+
+      <div className="w-full h-full absolute top-0 right-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200 bg-black/20">
+        <Button
+          variant="secondary"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            setLightboxOpen(true);
+          }}
+          className="bg-black/50 hover:bg-black/70 text-white border-white/20 backdrop-blur-sm"
+        >
+          <Expand className="w-4 h-4" />
+        </Button>
+      </div>
+      <ImageLightbox
+        src={src}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+      />
+    </div>
   );
 }

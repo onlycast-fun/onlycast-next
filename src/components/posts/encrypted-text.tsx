@@ -77,16 +77,28 @@ export function EncryptedText({
       isLoading={isLoading}
       onUnlockClick={handleUnlock}
     >
-      <div
-        className={cn(
-          "relative overflow-hidden rounded-lg bg-accent min-h-[300px] p-4 flex items-center justify-center",
-          className
-        )}
-      >
-        <span className="text-accent-foreground text-sm md:text-base font-mono whitespace-pre-wrap break-words transition-all duration-300">
-          {text}
-        </span>
-      </div>
+      <UnlockText text={text} />
     </UnlockOverlay>
+  );
+}
+
+export function UnlockText({
+  text,
+  className = "",
+}: {
+  text: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-lg bg-accent min-h-32  p-4 flex items-center justify-center",
+        className
+      )}
+    >
+      <span className="text-accent-foreground text-sm md:text-base font-mono whitespace-pre-wrap break-words transition-all duration-300">
+        {text}
+      </span>
+    </div>
   );
 }

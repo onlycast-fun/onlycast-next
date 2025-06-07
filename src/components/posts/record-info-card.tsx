@@ -12,6 +12,7 @@ import { getClankerTokenPath } from "@/lib/clanker/path";
 import { formatMarketCap } from "@/lib/utils";
 import { EncryptedRecord, RecordType } from "@/types/encrypted-record";
 import { User } from "@privy-io/react-auth";
+import { EncryptedMixedContent } from "./encrypted-mixed-content";
 
 interface PostCardProps {
   author: User;
@@ -78,31 +79,29 @@ export function RecordInfoCard({ author, token, record }: PostCardProps) {
         {(() => {
           if (record.type === RecordType.text) {
             return (
-              <div className="container mx-auto px-4 py-6 max-w-2xl">
-                <EncryptedText arid={arid} creatorToken={token} />
-              </div>
+              <EncryptedText
+                arid={arid}
+                creatorToken={token}
+                className="mb-4"
+              />
             );
           }
           if (record.type === RecordType.image) {
             return (
-              <div className="container mx-auto px-4 py-6 max-w-2xl">
-                <EncryptedImage
-                  className="w-full min-h-48 md:h-64 mb-4"
-                  arid={arid}
-                  creatorToken={token}
-                />
-              </div>
+              <EncryptedImage
+                className="w-full min-h-48 md:h-64 mb-4"
+                arid={arid}
+                creatorToken={token}
+              />
             );
           }
           if (record.type === RecordType.mixed) {
             return (
-              <div className="container mx-auto px-4 py-6 max-w-2xl">
-                <EncryptedImage
-                  className="w-full min-h-48 md:h-64 mb-4"
-                  arid={arid}
-                  creatorToken={token}
-                />
-              </div>
+              <EncryptedMixedContent
+                className="w-full min-h-48 md:h-64 mb-4"
+                arid={arid}
+                creatorToken={token}
+              />
             );
           }
         })()}

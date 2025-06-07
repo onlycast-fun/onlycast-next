@@ -81,23 +81,13 @@ export function PostCard({ token, cast }: PostCardProps) {
         {/* Encrypted Texts */}
         {encryptedTexts.length > 0 &&
           encryptedTexts.map((text, idx) => (
-            <EncryptedText
-              key={idx}
-              arid={text.ar_id}
-              creatorToken={token}
-              className="mb-4"
-            />
+            <EncryptedText key={idx} arid={text.ar_id} creatorToken={token} />
           ))}
 
         {/* Encrypted Image */}
         {encryptedImgs.length > 0 &&
           encryptedImgs.map((img, idx) => (
-            <EncryptedImage
-              key={idx}
-              arid={img.ar_id}
-              creatorToken={token}
-              className="w-full min-h-48 md:min-h-64 mb-4"
-            />
+            <EncryptedImage key={idx} arid={img.ar_id} creatorToken={token} />
           ))}
 
         {/* Encrypted Multi Content */}
@@ -107,7 +97,6 @@ export function PostCard({ token, cast }: PostCardProps) {
               key={idx}
               arid={mixedContent.ar_id}
               creatorToken={token}
-              className="w-full min-h-64 md:min-h-80 mb-4"
             />
           ))}
       </CardContent>
