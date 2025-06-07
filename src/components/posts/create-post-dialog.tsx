@@ -216,7 +216,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
         <DialogTitle>Publish</DialogTitle>
       </DialogHeader>
 
-      <div className="space-y-6 px-1 max-h-[90vh] overflow-y-auto">
+      <div className="space-y-6 px-1 max-h-[85vh] overflow-y-auto">
         <CreatePostAlert />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
