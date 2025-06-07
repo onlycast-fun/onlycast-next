@@ -251,7 +251,7 @@ export function CreateTokenContent({
               name="percentage"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Percentage (%)</FormLabel>
+                  <FormLabel>Vault percentage (%)</FormLabel>
                   <FormControl>
                     <div className="space-y-3">
                       <Input
@@ -347,7 +347,7 @@ export function CreateTokenContent({
                       !isDurationEnabled && "text-muted-foreground"
                     )}
                   >
-                    Duration in Days
+                    Unlock in a few days
                     {!isDurationEnabled && " (Set percentage first)"}
                   </FormLabel>
                   <FormControl>
