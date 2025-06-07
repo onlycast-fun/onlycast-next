@@ -107,7 +107,7 @@ export default function NeynarCastText({
       );
     }
     return (
-      <span className=" text-foreground" key={index}>
+      <span className=" text-foreground wrap-break-word  " key={index}>
         {part}
       </span>
     );

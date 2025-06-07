@@ -10,7 +10,10 @@ import { formatEmbeds } from "@/lib/farcaster/cast-embed";
 import EmbedImgs from "./casts/cast-imgs";
 import NeynarCastText from "./casts/cast-text";
 import Link from "next/link";
-import { getFarcasterUserPath } from "@/lib/farcaster/path";
+import {
+  getFarcasterCastPath,
+  getFarcasterUserPath,
+} from "@/lib/farcaster/path";
 import { EncryptedText } from "./encrypted-text";
 import { getClankerTokenPath } from "@/lib/clanker/path";
 import { formatMarketCap } from "@/lib/utils";
@@ -99,6 +102,16 @@ export function PostCard({ token, cast }: PostCardProps) {
               creatorToken={token}
             />
           ))}
+        <div className="flex items-center justify-center mt-2">
+          {" "}
+          <Link
+            href={getFarcasterCastPath(author.username, cast.hash)}
+            target="_blank"
+            className="w-auto p-0 text-xs text-muted-foreground hover:underline font-medium"
+          >
+            View in farcaster
+          </Link>{" "}
+        </div>
       </CardContent>
     </Card>
   );
