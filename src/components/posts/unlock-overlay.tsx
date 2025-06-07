@@ -165,7 +165,7 @@ export function UnlockOverlay({
               >
                 <div className="flex items-center gap-3">
                   <Coins className="w-5 h-5" />
-                  <span>
+                  <span className="max-sm:text-xs">
                     {isLoading
                       ? "Verifying..."
                       : `Hold ${requiredAmount.toLocaleString()} $${creatorToken} to unlock`}

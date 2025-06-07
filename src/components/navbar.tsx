@@ -7,6 +7,7 @@ import { Home, Coins, Trophy } from "lucide-react";
 import { SocialLinks } from "@/components/social-links";
 import { UserProfile } from "./user/user-profile";
 import Image from "next/image";
+import { Badge } from "./ui/badge";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -37,6 +38,12 @@ export function Navbar() {
               <span className="text-2xl font-bold text-primary transition-colors duration-200 group-hover:text-primary/80">
                 OnlyCast
               </span>
+              <Badge
+                variant="secondary"
+                className="text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800"
+              >
+                Beta
+              </Badge>
             </Link>
 
             <div className="flex items-center space-x-6">
@@ -93,8 +100,17 @@ export function Navbar() {
       {/* Mobile Top Bar - Logo, Social Links, and User Profile */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between max-w-full">
-          <Link href="/" className="text-xl font-bold text-primary">
+          <Link
+            href="/"
+            className="text-xl font-bold text-primary flex items-center space-x-2 gap-1"
+          >
             OnlyCast
+            <Badge
+              variant="secondary"
+              className="text-xs scale-75 font-normal bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border-orange-200 dark:border-orange-800"
+            >
+              Beta
+            </Badge>
           </Link>
 
           <div className="flex items-center space-x-2">
