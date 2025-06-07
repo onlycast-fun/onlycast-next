@@ -9,6 +9,7 @@ import {
   UploadImageResponse,
 } from "@/types";
 import { LeaderboardItemData } from "@/types/leaderboard";
+import { NeynarCast } from "@/types/neynar";
 
 export class RequestSdk {
   private apiUrl: string;
@@ -197,5 +198,12 @@ export class RequestSdk {
       iv: string;
       salt: string;
     }>(`/encrypted-records/gen-keys`);
+  }
+
+  async submitCast(data: { signer: string; fid: number; text: string }) {
+    return await this.request<{ data: NeynarCast }>(`/farcaster/casts`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   }
 }

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Home, Coins, Trophy } from "lucide-react";
 import { SocialLinks } from "@/components/social-links";
 import { UserProfile } from "./user/user-profile";
+import Image from "next/image";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -23,8 +24,19 @@ export function Navbar() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-full">
           {/* Left side - Logo and Navigation */}
           <div className="flex items-center space-x-8">
-            <Link href="/" className="text-2xl font-bold text-primary">
-              OnlyCast
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="relative w-8 h-8 transition-transform duration-200 group-hover:scale-105">
+                <Image
+                  src="/logo.png"
+                  alt="OnlyCast Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <span className="text-2xl font-bold text-primary transition-colors duration-200 group-hover:text-primary/80">
+                OnlyCast
+              </span>
             </Link>
 
             <div className="flex items-center space-x-6">

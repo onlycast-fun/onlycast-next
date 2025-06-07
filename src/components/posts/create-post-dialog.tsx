@@ -52,7 +52,7 @@ export function CreatePostDialog() {
       <DialogTrigger asChild>
         <Button className="gap-2">
           <Plus className="w-4 h-4" />
-          Create Cast
+          Publish
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
@@ -196,24 +196,24 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
   const handleTextToggle = () => {
     if (disabled) return;
     setIsTextExpanded(!isTextExpanded);
-    if (!isTextExpanded) {
-      // Clear the field when collapsing
-      form.setValue("encryptedContent", "");
-    }
+    // if (!isTextExpanded) {
+    //   // Clear the field when collapsing
+    //   form.setValue("encryptedContent", "");
+    // }
   };
 
   const handleImageToggle = () => {
     if (disabled) return;
     setIsImageExpanded(!isImageExpanded);
-    if (!isImageExpanded) {
-      // Clear the field when collapsing
-      form.setValue("encryptedImage", undefined);
-    }
+    // if (!isImageExpanded) {
+    //   // Clear the field when collapsing
+    //   form.setValue("encryptedImage", undefined);
+    // }
   };
   return (
     <>
       <DialogHeader className="bg-background pb-4">
-        <DialogTitle>Create New Cast</DialogTitle>
+        <DialogTitle>Publish</DialogTitle>
       </DialogHeader>
 
       <div className="space-y-6 px-1">
@@ -225,14 +225,11 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
               <div className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-primary" />
                 <h3 className="text-base font-semibold">Premium Content</h3>
-                <span className="text-sm text-muted-foreground">
-                  (Token holders only)
-                </span>
               </div>
 
               <div className="border border-dashed border-primary/25 rounded-lg p-4 space-y-4 bg-primary/5">
                 <p className="text-sm text-muted-foreground text-center">
-                  Add at least one type of premium content
+                  Viewable by token holders only
                 </p>
 
                 {/* Premium Text */}
@@ -246,7 +243,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                   >
                     <div className="flex items-center gap-2">
                       <FileText className="h-4 w-4" />
-                      <span className="font-medium">Text Content</span>
+                      <span className="font-medium">Text</span>
                       <span className="text-xs text-muted-foreground">
                         (Optional)
                       </span>
@@ -294,7 +291,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                   >
                     <div className="flex items-center gap-2">
                       <ImageIcon className="h-4 w-4" />
-                      <span className="font-medium">Image Content</span>
+                      <span className="font-medium">Image</span>
                       <span className="text-xs text-muted-foreground">
                         (Optional)
                       </span>
@@ -374,7 +371,7 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
                 disabled={disabled || !hasEncryptedContent}
                 className="w-full sm:w-auto"
               >
-                {isSubmitting ? "Creating..." : "Create"}
+                {isSubmitting ? "Creating..." : "Publish to farcaster"}
               </Button>
             </div>
           </form>
