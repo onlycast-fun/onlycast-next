@@ -27,17 +27,19 @@ export const createTokenSchema = z
     percentage: z
       .number()
       .min(0, "Percentage cannot be negative")
-      .max(100, "Percentage cannot exceed 100"),
+      .max(100, "Percentage cannot exceed 100")
+      .optional(),
     durationInDays: z
       .number()
       .min(0, "Duration cannot be negative")
-      .max(365, "Duration cannot exceed 365 days"),
+      .max(365, "Duration cannot exceed 365 days")
+      .optional(),
   })
   .refine(
     (data) => {
       // If percentage is set (> 0), duration must be at least 31 days
-      if (data.percentage > 0) {
-        return data.durationInDays >= 31;
+      if (data.percentage && data.percentage > 0) {
+        return data.durationInDays && data.durationInDays >= 31;
       }
       return true;
     },

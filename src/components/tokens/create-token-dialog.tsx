@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ export function CreateTokenContent({
   const { tokens, setTokens, fcUser } = useUserInfo();
   const fcWalletAddress = getUserPrimaryEthAddress(fcUser!);
   const hasTokens = (tokens?.length ?? 0) > 0;
-
+  const [isVaultSettingsExpanded, setIsVaultSettingsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<CreateTokenData>({
@@ -94,7 +94,7 @@ export function CreateTokenContent({
   });
 
   // Watch percentage to control duration field
-  const percentage = form.watch("percentage");
+  const percentage = form.watch("percentage") || 0;
   const isDurationEnabled = percentage > 0;
 
   const { create, creating } = useCreateToken(fcWalletAddress);
@@ -177,6 +177,16 @@ export function CreateTokenContent({
       form.setValue("durationInDays", value);
     }
   };
+
+  const handleVaultSettingsToggle = () => {
+    setIsVaultSettingsExpanded(!isVaultSettingsExpanded);
+
+    // If collapsing and fields are empty, clear them
+    if (isVaultSettingsExpanded && !percentage) {
+      form.setValue("percentage", undefined);
+      form.setValue("durationInDays", undefined);
+    }
+  };
   return (
     <>
       {" "}
@@ -246,172 +256,212 @@ export function CreateTokenContent({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="percentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vault percentage (%)</FormLabel>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <Input
-                        type="number"
-                        min={0}
-                        max={100}
-                        placeholder="0"
-                        disabled={disabled}
-                        {...field}
-                        onChange={(e) => {
-                          const value = Number.parseInt(e.target.value) || 0;
-                          field.onChange(value);
-                          // Auto-set duration when percentage is set
-                          if (
-                            value > 0 &&
-                            form.getValues("durationInDays") === 0
-                          ) {
-                            form.setValue("durationInDays", 31);
-                          }
-                          if (value === 0) {
-                            form.setValue("durationInDays", 0);
-                          }
-                        }}
-                      />
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={disabled}
-                          onClick={() => handlePercentageQuickSet(5)}
-                          className={cn(
-                            percentage === 5 &&
-                              "bg-primary text-primary-foreground"
-                          )}
-                        >
-                          5%
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={disabled}
-                          onClick={() => handlePercentageQuickSet(15)}
-                          className={cn(
-                            percentage === 15 &&
-                              "bg-primary text-primary-foreground"
-                          )}
-                        >
-                          15%
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={disabled}
-                          onClick={() => handlePercentageQuickSet(30)}
-                          className={cn(
-                            percentage === 30 &&
-                              "bg-primary text-primary-foreground"
-                          )}
-                        >
-                          30%
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          disabled={disabled}
-                          onClick={() => handlePercentageQuickSet(0)}
-                          className={cn(
-                            percentage === 0 &&
-                              "bg-primary text-primary-foreground"
-                          )}
-                        >
-                          Clear
-                        </Button>
-                      </div>
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Creator Vault Settings - Collapsible Optional Section */}
+            <div className="space-y-4">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleVaultSettingsToggle}
+                disabled={disabled}
+                className="w-full justify-between p-3 h-auto border border-border hover:bg-muted/50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  <span className="font-medium">Creator Vault Settings</span>
+                  <span className="text-xs text-muted-foreground">
+                    (Optional)
+                  </span>
+                </div>
+                {isVaultSettingsExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
 
-            <FormField
-              control={form.control}
-              name="durationInDays"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel
-                    className={cn(
-                      !isDurationEnabled && "text-muted-foreground"
+              {isVaultSettingsExpanded && (
+                <div className="space-y-6 border border-dashed border-primary/25 rounded-lg p-4 bg-primary/5">
+                  <div className="text-sm text-muted-foreground">
+                    Configure token vesting and lockup settings for the creator
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="percentage"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Vault percentage (%)</FormLabel>
+                        <FormControl>
+                          <div className="space-y-3">
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              placeholder="0"
+                              disabled={disabled}
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Number.parseInt(e.target.value) || 0;
+                                field.onChange(value);
+                                // Auto-set duration when percentage is set
+                                if (
+                                  value &&
+                                  value > 0 &&
+                                  !form.getValues("durationInDays")
+                                ) {
+                                  form.setValue("durationInDays", 31);
+                                }
+                                if (!value || value === 0) {
+                                  form.setValue("durationInDays", undefined);
+                                }
+                              }}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={disabled}
+                                onClick={() => handlePercentageQuickSet(5)}
+                                className={cn(
+                                  percentage === 5 &&
+                                    "bg-primary text-primary-foreground"
+                                )}
+                              >
+                                5%
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={disabled}
+                                onClick={() => handlePercentageQuickSet(15)}
+                                className={cn(
+                                  percentage === 15 &&
+                                    "bg-primary text-primary-foreground"
+                                )}
+                              >
+                                15%
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={disabled}
+                                onClick={() => handlePercentageQuickSet(30)}
+                                className={cn(
+                                  percentage === 30 &&
+                                    "bg-primary text-primary-foreground"
+                                )}
+                              >
+                                30%
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={disabled}
+                                onClick={() => handlePercentageQuickSet(0)}
+                                className={cn(
+                                  !percentage &&
+                                    "bg-primary text-primary-foreground"
+                                )}
+                              >
+                                Clear
+                              </Button>
+                            </div>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  >
-                    Unlock in a few days
-                    {!isDurationEnabled && " (Set percentage first)"}
-                  </FormLabel>
-                  <FormControl>
-                    <div className="space-y-3">
-                      <Input
-                        type="number"
-                        min={isDurationEnabled ? 31 : 0}
-                        max={365}
-                        placeholder={isDurationEnabled ? "31" : "0"}
-                        disabled={disabled || !isDurationEnabled}
-                        {...field}
-                        onChange={(e) =>
-                          field.onChange(Number.parseInt(e.target.value) || 0)
-                        }
-                      />
-                      {isDurationEnabled && (
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={disabled || !isDurationEnabled}
-                            onClick={() => handleDurationQuickSet(31)}
-                            className={cn(
-                              field.value === 31 &&
-                                "bg-primary text-primary-foreground"
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="durationInDays"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel
+                          className={cn(
+                            !isDurationEnabled && "text-muted-foreground"
+                          )}
+                        >
+                          Unlocks in a few days
+                          {!isDurationEnabled && " (Set percentage first)"}
+                        </FormLabel>
+                        <FormControl>
+                          <div className="space-y-3">
+                            <Input
+                              type="number"
+                              min={isDurationEnabled ? 31 : 0}
+                              max={365}
+                              placeholder={isDurationEnabled ? "31" : "0"}
+                              disabled={disabled || !isDurationEnabled}
+                              value={field.value || ""}
+                              onChange={(e) => {
+                                const value =
+                                  e.target.value === ""
+                                    ? undefined
+                                    : Number.parseInt(e.target.value) || 0;
+                                field.onChange(value);
+                              }}
+                            />
+                            {isDurationEnabled && (
+                              <div className="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={disabled || !isDurationEnabled}
+                                  onClick={() => handleDurationQuickSet(31)}
+                                  className={cn(
+                                    field.value === 31 &&
+                                      "bg-primary text-primary-foreground"
+                                  )}
+                                >
+                                  31 days
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={disabled || !isDurationEnabled}
+                                  onClick={() => handleDurationQuickSet(90)}
+                                  className={cn(
+                                    field.value === 90 &&
+                                      "bg-primary text-primary-foreground"
+                                  )}
+                                >
+                                  90 days
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  disabled={disabled || !isDurationEnabled}
+                                  onClick={() => handleDurationQuickSet(180)}
+                                  className={cn(
+                                    field.value === 180 &&
+                                      "bg-primary text-primary-foreground"
+                                  )}
+                                >
+                                  180 days
+                                </Button>
+                              </div>
                             )}
-                          >
-                            31 days
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={disabled || !isDurationEnabled}
-                            onClick={() => handleDurationQuickSet(90)}
-                            className={cn(
-                              field.value === 90 &&
-                                "bg-primary text-primary-foreground"
-                            )}
-                          >
-                            90 days
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            disabled={disabled || !isDurationEnabled}
-                            onClick={() => handleDurationQuickSet(180)}
-                            className={cn(
-                              field.value === 180 &&
-                                "bg-primary text-primary-foreground"
-                            )}
-                          >
-                            180 days
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
-            />
+            </div>
 
             <div className="flex justify-end space-x-3 pt-4 sticky bottom-0 bg-background">
               <Button
