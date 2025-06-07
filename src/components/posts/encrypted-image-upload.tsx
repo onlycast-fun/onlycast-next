@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Upload, Lock, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface EncryptedImageUploadProps {
   value?: File;
@@ -104,11 +105,23 @@ export function EncryptedImageUpload({
             >
               Only users who hold your token can view this image
             </p>
+            <p
+              className={`text-xs mb-4 ${
+                disabled ? "text-muted-foreground/50" : "text-muted-foreground"
+              }`}
+            >
+              Max size: 1MB
+            </p>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => {
                 const file = e.target.files?.[0] || null;
+                if (file && file.size > 1024 * 1024) {
+                  toast.error("Image size must be less than 1MB");
+                  e.target.value = ""; // Clear the input
+                  return;
+                }
                 handleImageChange(file);
               }}
               className="hidden"
