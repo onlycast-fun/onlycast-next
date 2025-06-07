@@ -356,20 +356,20 @@ function CreatePostContent({ setOpen }: { setOpen: (open: boolean) => void }) {
               )}
             />
 
-            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-4 sticky bottom-0 bg-background">
+            <div className="flex flex-row justify-end gap-3 pt-4 sticky bottom-0 bg-background">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto"
+                className="w-auto"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={disabled || !hasEncryptedContent}
-                className="w-full sm:w-auto"
+                className="w-auto"
               >
                 {isSubmitting ? "Creating..." : "Publish to farcaster"}
               </Button>
