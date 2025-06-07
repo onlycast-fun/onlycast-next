@@ -102,7 +102,7 @@ export function PostCard({ token, cast }: PostCardProps) {
               creatorToken={token}
             />
           ))}
-        <div className="flex items-center justify-center mt-2">
+        <div className="mt-2">
           {" "}
           <Link
             href={getFarcasterCastPath(author.username, cast.hash)}
