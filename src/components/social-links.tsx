@@ -49,12 +49,12 @@ const socialLinks = [
     icon: TwitterIcon,
     description: "Follow us on Twitter",
   },
-  // {
-  //   name: "Telegram",
-  //   url: SOCIAL_LINKS.telegram,
-  //   icon: TelegramIcon,
-  //   description: "Join our Telegram group",
-  // },
+  {
+    name: "Telegram",
+    url: SOCIAL_LINKS.telegram,
+    icon: TelegramIcon,
+    description: "Join our Telegram group",
+  },
   {
     name: "Farcaster",
     url: SOCIAL_LINKS.farcaster,
