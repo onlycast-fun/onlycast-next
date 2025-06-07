@@ -201,7 +201,7 @@ export function CreateTokenContent({
             )}
           />
 
-          {/* <FormField
+          <FormField
             control={form.control}
             name="percentage"
             render={({ field }) => (
@@ -244,7 +244,7 @@ export function CreateTokenContent({
                 <FormMessage />
               </FormItem>
             )}
-          /> */}
+          />
 
           <div className="flex justify-end space-x-3">
             <Button
